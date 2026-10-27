@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CSET Examination Portal · Fall 2026</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="print-header">
+    <h1>Emerson University Multan</h1>
+    <p>Faculty of Computing & Emerging Technologies · Department of Computer Science & Emerging Technologies<br>Mid-Term Examination Date Sheet · Fall 2026</p>
+  </div>
+  <header class="top no-print">
+    <div class="brand">
+      <div class="logo">EU</div>
+      <div>
+        <b>EMERSON UNIVERSITY MULTAN</b>
+        <small>Faculty of Computing & Emerging Technologies</small>
+      </div>
+    </div>
+    <button id="theme" class="icon" title="Toggle Dark Mode">☾</button>
+  </header>
+  <nav id="nav" class="no-print">
+    <button class="active" data-view="dashboard">Dashboard</button>
+    <button data-view="complete">Complete Date Sheet</button>
+    <button data-view="teacher">Teacher Sheets</button>
+    <button data-view="program">Program Sheets</button>
+    <button data-view="class">Class Sheets</button>
+    <button data-view="calendar">Calendar</button>
+    <button data-view="print">Print & Export</button>
+  </nav>
+  <main>
+    <section class="hero no-print">
+      <p class="eyebrow">FCET / CSET · FALL 2026</p>
+      <h1>Mid-Term Examination<br><span>Date Sheet Portal</span></h1>
+      <p>Official examination schedules for 28 October – 6 November 2026.</p>
+    </section>
+    <div id="app">
+      <div class="loading">Loading verified schedule…</div>
+    </div>
+  </main>
+  <footer class="no-print">Emerson University Multan · Faculty of Computing and Emerging Technologies</footer>
+  <script src="data/exam_schedule.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
