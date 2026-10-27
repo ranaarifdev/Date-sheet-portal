@@ -6,6 +6,19 @@ let selected = [];
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+function formatDate(value) {
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+}
+
+function periodForRows(rows, fallback = 'Examination period: 28 October 2026 to 6 November 2026') {
+  const dates = rows.map(row => row.date).filter(Boolean).sort();
+  if (!dates.length) return fallback;
+  return `Examination period: ${formatDate(dates[0])} to ${formatDate(dates[dates.length - 1])}`;
+}
+
 function safe(s) {
   return String(s || 'schedule').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
 }
@@ -133,16 +146,16 @@ function getPrintMeta(rows) {
     title: 'EMERSON UNIVERSITY MULTAN',
     department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES',
     heading: 'MID-TERM EXAMINATION DATE SHEET',
-    subheading: 'FALL SEMESTER 2026',
+    semesterLabel: 'FALL SEMESTER 2026',
     period: 'Examination period: 28 October 2026 to 6 November 2026',
     generatedOn: `Date sheet generated: ${generatedAt}`
   };
 
   if (view === 'teacher' && $('#teacherSelect')?.value) {
-    return { ...base, subheading: 'Teacher-Wise Examination Date Sheet', detail: $('#teacherSelect').value };
+    return { ...base, period: periodForRows(rows), subtitle: 'Teacher-Wise Examination Date Sheet', detail: $('#teacherSelect').value };
   }
   if (view === 'program' && $('#programSelect')?.value) {
-    return { ...base, subheading: 'Program-Wise Examination Date Sheet', detail: $('#programSelect').value };
+    return { ...base, period: periodForRows(rows), subtitle: 'Program-Wise Examination Date Sheet', detail: $('#programSelect').value };
   }
   if (view === 'class' && $('#classP')?.value) {
     const p = $('#classP').value;
@@ -150,15 +163,15 @@ function getPrintMeta(rows) {
     const sec = $('#classSec').value;
     const shift = $('#classSh').value;
     const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift}`;
-    return { ...base, subheading: 'Class-Wise Examination Date Sheet', detail: classDetail };
+    return { ...base, period: periodForRows(rows), subtitle: 'Class-Wise Examination Date Sheet', detail: classDetail };
   }
   if (view === 'calendar') {
-    return { ...base, subheading: 'Examination Calendar', detail: 'Departmental examination schedule' };
+    return { ...base, period: periodForRows(rows), subtitle: 'Examination Calendar', detail: 'Departmental examination schedule' };
   }
   if (view === 'complete') {
-    return { ...base, subheading: 'Complete Examination Date Sheet', detail: `${rows.length} records` };
+    return { ...base, subtitle: 'Complete Examination Date Sheet', detail: `${rows.length} records` };
   }
-  return { ...base, subheading: 'Complete Examination Date Sheet', detail: 'Portal overview' };
+  return { ...base, subtitle: 'Complete Examination Date Sheet', detail: 'Portal overview' };
 }
 
 function buildPrintTable(rows) {
@@ -167,6 +180,18 @@ function buildPrintTable(rows) {
   }
 
   const isCalendar = view === 'calendar';
+  const isTeacherSheet = view === 'teacher';
+  if (isTeacherSheet) {
+    return `<table class="print-table teacher-print-table">
+      <thead><tr><th>Date / Day</th><th>Time</th><th>Program / Class</th><th>Course / Room</th></tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td>${esc(formatDate(r.date))}<br><span class="print-secondary">${esc(r.day)}</span></td>
+        <td>${esc(r.startTime)} – ${esc(r.endTime)}</td>
+        <td>${esc(r.program)}<br><span class="print-secondary">Semester ${esc(r.semester)} · Section ${esc(r.section)} · ${esc(r.shift)}</span></td>
+        <td>${esc(r.courseTitle)}<br><span class="print-secondary">${esc(r.courseCode)} · ${esc(r.room)}</span></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
   const columns = isCalendar
     ? ['date', 'day', 'startTime', 'endTime', 'courseCode', 'courseTitle', 'program', 'semester', 'section', 'shift', 'teacher', 'room']
     : ['date', 'day', 'startTime', 'endTime', 'program', 'semester', 'section', 'shift', 'courseCode', 'courseTitle', 'teacher', 'room'];
@@ -210,7 +235,8 @@ function renderPrintDocument() {
       <div class="print-title">${esc(meta.title)}</div>
       <div class="print-department">${esc(meta.department)}</div>
       <div class="print-heading">${esc(meta.heading)}</div>
-      <div class="print-subheading">${esc(meta.subheading)}</div>
+      <div class="print-subheading">${esc(meta.semesterLabel)}</div>
+      <div class="print-subheading">${esc(meta.subtitle || 'Complete Examination Date Sheet')}</div>
       ${meta.detail ? `<div class="print-context">${esc(meta.detail)}</div>` : ''}
       <div class="print-meta">
         <span>${esc(meta.period)}</span>
@@ -243,7 +269,7 @@ function triggerPrint(rows, metaOverride) {
   const rowsToPrint = rows && rows.length ? rows : getCurrentPrintRows();
   if (!rowsToPrint.length) return;
   if (metaOverride) {
-    const override = { title: 'EMERSON UNIVERSITY MULTAN', department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES', heading: 'MID-TERM EXAMINATION DATE SHEET', subheading: 'FALL SEMESTER 2026', ...metaOverride };
+    const override = { title: 'EMERSON UNIVERSITY MULTAN', department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES', heading: 'MID-TERM EXAMINATION DATE SHEET', semesterLabel: 'FALL SEMESTER 2026', period: view === 'complete' ? 'Examination period: 28 October 2026 to 6 November 2026' : periodForRows(rowsToPrint), ...metaOverride };
     const printDoc = document.getElementById('printDocument') || document.createElement('div');
     printDoc.id = 'printDocument';
     printDoc.className = 'print-sheet';
@@ -252,7 +278,8 @@ function triggerPrint(rows, metaOverride) {
         <div class="print-title">${esc(override.title)}</div>
         <div class="print-department">${esc(override.department)}</div>
         <div class="print-heading">${esc(override.heading)}</div>
-        <div class="print-subheading">${esc(override.subheading)}</div>
+        <div class="print-subheading">${esc(override.semesterLabel)}</div>
+        <div class="print-subheading">${esc(override.subtitle || 'Complete Examination Date Sheet')}</div>
         ${override.detail ? `<div class="print-context">${esc(override.detail)}</div>` : ''}
         <div class="print-meta">
           <span>${esc(override.period || 'Examination period: 28 October 2026 to 6 November 2026')}</span>

@@ -446,5 +446,75 @@
     "browserPrinting": "passed (verified A4 layout, headers displayed, controls hidden)",
     "csvDownload": "passed (verified UTF-8 BOM, RFC 4180 quote escaping, sanitized filenames)",
     "localSetup": "passed (dual zero-config local loading via data/exam_schedule.js and HTTP static server support)"
+  },
+  "pdfConversion": {
+    "sourceFile": "CSET Mid Term Examination Fall 2026.pdf",
+    "totalPages": 18,
+    "status": "converted_with_page_separators",
+    "pagesProcessed": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "notes": "All 18 PDF pages extracted with PyMuPDF. Missing teacher names were retained as blank values and flagged for manual review in the extracted content and schedule metadata.",
+    "manualReview": [
+      {
+        "page": 1,
+        "recordId": "exam-007",
+        "field": "Invigilator(s)",
+        "value": "blank",
+        "issue": "Teacher/invigilator missing in source PDF"
+      },
+      {
+        "page": 9,
+        "recordId": "exam-061",
+        "field": "Invigilator(s)",
+        "value": "blank",
+        "issue": "Teacher/invigilator missing in source PDF"
+      },
+      {
+        "page": 14,
+        "recordId": "exam-121",
+        "field": "Invigilator(s)",
+        "value": "blank",
+        "issue": "Teacher/invigilator missing in source PDF"
+      },
+      {
+        "page": 16,
+        "recordId": "exam-169",
+        "field": "Invigilator(s)",
+        "value": "blank",
+        "issue": "Teacher/invigilator missing in source PDF"
+      },
+      {
+        "page": 18,
+        "recordId": "exam-230",
+        "field": "Invigilator(s)",
+        "value": "blank",
+        "issue": "Teacher/invigilator missing in source PDF"
+      },
+      {
+        "page": 18,
+        "recordId": "exam-306",
+        "field": "Invigilator(s)",
+        "value": "blank",
+        "issue": "Teacher/invigilator missing in source PDF"
+      }
+    ]
   }
 }
