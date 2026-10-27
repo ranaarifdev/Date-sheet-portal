@@ -108,28 +108,6 @@ function table(rows, isTeacherView = false) {
   </table></div>`;
 }
 
-function download(rows, name) {
-  const cols = ['date', 'day', 'startTime', 'endTime', 'slot', 'program', 'semester', 'section', 'shift', 'courseCode', 'courseTitle', 'teacher', 'room'];
-  const headers = ['Date', 'Day', 'Start Time', 'End Time', 'Slot', 'Program', 'Semester', 'Section', 'Shift', 'Course Code', 'Course Title', 'Invigilator', 'Room'];
-  const csvRows = [
-    headers.map(h => `"${h}"`).join(','),
-    ...rows.map(r => cols.map(k => {
-      let val = r[k] ?? '';
-      if (k === 'teacher' && (!val || !String(val).trim())) val = 'Not Available';
-      return `"${String(val).replaceAll('"', '""')}"`;
-    }).join(','))
-  ];
-  const csvContent = '\ufeff' + csvRows.join('\r\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-}
-
 function getCurrentPrintRows() {
   if (view === 'teacher' || view === 'program' || view === 'class' || view === 'calendar') {
     return [...selected].sort(sortBySchedule);
@@ -147,68 +125,107 @@ function getPrintMeta(rows) {
     department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES',
     heading: 'MID-TERM EXAMINATION DATE SHEET',
     semesterLabel: 'FALL SEMESTER 2026',
-    period: 'Examination period: 28 October 2026 to 6 November 2026',
-    generatedOn: `Date sheet generated: ${generatedAt}`
+    period: periodForRows(rows),
+    generatedOn: `Generated: ${generatedAt}`
   };
 
   if (view === 'teacher' && $('#teacherSelect')?.value) {
-    return { ...base, period: periodForRows(rows), subtitle: 'Teacher-Wise Examination Date Sheet', detail: $('#teacherSelect').value };
+    const teacherName = $('#teacherSelect').value;
+    return {
+      ...base,
+      subtitle: 'Teacher-Wise Examination Date Sheet',
+      detail: `Teacher / Invigilator: ${teacherName}`
+    };
   }
   if (view === 'program' && $('#programSelect')?.value) {
-    return { ...base, period: periodForRows(rows), subtitle: 'Program-Wise Examination Date Sheet', detail: $('#programSelect').value };
+    const p = $('#programSelect').value;
+    const sem = $('#programSem').value;
+    const sec = $('#programSec').value;
+    const shift = $('#programShift').value;
+    let detail = p;
+    if (sem) detail += ` · Semester ${sem}`;
+    if (sec) detail += ` · Section ${sec}`;
+    if (shift) detail += ` · ${shift}`;
+    return { ...base, subtitle: 'Program-Wise Examination Date Sheet', detail };
   }
   if (view === 'class' && $('#classP')?.value) {
     const p = $('#classP').value;
     const s = $('#classS').value;
     const sec = $('#classSec').value;
     const shift = $('#classSh').value;
-    const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift}`;
-    return { ...base, period: periodForRows(rows), subtitle: 'Class-Wise Examination Date Sheet', detail: classDetail };
+    const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift} Shift`;
+    return { ...base, subtitle: 'Class-Wise Examination Date Sheet', detail: classDetail };
   }
   if (view === 'calendar') {
-    return { ...base, period: periodForRows(rows), subtitle: 'Examination Calendar', detail: 'Departmental examination schedule' };
+    return { ...base, subtitle: 'Examination Calendar', detail: 'Departmental Examination Schedule' };
   }
   if (view === 'complete') {
-    return { ...base, subtitle: 'Complete Examination Date Sheet', detail: `${rows.length} records` };
+    return { ...base, subtitle: 'Complete Examination Date Sheet', detail: `Total records: ${rows.length}` };
   }
-  return { ...base, subtitle: 'Complete Examination Date Sheet', detail: 'Portal overview' };
+  return { ...base, subtitle: 'Complete Examination Date Sheet', detail: '' };
 }
 
+/* Build the print-ready HTML table */
 function buildPrintTable(rows) {
   if (!rows.length) {
     return '<div class="print-empty">No matching records available for printing.</div>';
   }
 
-  const isCalendar = view === 'calendar';
   const isTeacherSheet = view === 'teacher';
-  if (isTeacherSheet) {
-    return `<table class="print-table teacher-print-table">
-      <thead><tr><th>Date / Day</th><th>Time</th><th>Program / Class</th><th>Course / Room</th></tr></thead>
-      <tbody>${rows.map(r => `<tr>
-        <td>${esc(formatDate(r.date))}<br><span class="print-secondary">${esc(r.day)}</span></td>
+  const isClassSheet = view === 'class';
+
+  if (isClassSheet) {
+    return `<table class="print-table class-print-table">
+      <thead><tr>
+        <th>Sr.</th><th>Date</th><th>Day</th><th>Time</th>
+        <th>Course Code</th><th>Course Title</th><th>Room</th>
+      </tr></thead>
+      <tbody>${rows.map((r, i) => `<tr>
+        <td>${i + 1}</td>
+        <td>${esc(formatDate(r.date))}</td>
+        <td>${esc(r.day)}</td>
         <td>${esc(r.startTime)} – ${esc(r.endTime)}</td>
-        <td>${esc(r.program)}<br><span class="print-secondary">Semester ${esc(r.semester)} · Section ${esc(r.section)} · ${esc(r.shift)}</span></td>
-        <td>${esc(r.courseTitle)}<br><span class="print-secondary">${esc(r.courseCode)} · ${esc(r.room)}</span></td>
+        <td>${esc(r.courseCode || 'N/A')}</td>
+        <td>${esc(r.courseTitle || 'N/A')}</td>
+        <td>${esc(r.room || 'N/A')}</td>
       </tr>`).join('')}</tbody>
     </table>`;
   }
+
+  if (isTeacherSheet) {
+    return `<table class="print-table teacher-print-table">
+      <thead><tr>
+        <th>Sr.</th><th>Date</th><th>Day</th><th>Time</th>
+        <th>Program</th><th>Sem.</th><th>Sec.</th><th>Shift</th>
+        <th>Course Code</th><th>Course Title</th><th>Room</th>
+      </tr></thead>
+      <tbody>${rows.map((r, i) => `<tr>
+        <td>${i + 1}</td>
+        <td>${esc(formatDate(r.date))}</td>
+        <td>${esc(r.day)}</td>
+        <td>${esc(r.startTime)} – ${esc(r.endTime)}</td>
+        <td>${esc(r.program)}</td>
+        <td>${esc(r.semester)}</td>
+        <td>${esc(r.section)}</td>
+        <td>${esc(r.shift)}</td>
+        <td>${esc(r.courseCode || 'N/A')}</td>
+        <td>${esc(r.courseTitle || 'N/A')}</td>
+        <td>${esc(r.room || 'N/A')}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  /* Calendar / Complete / Program views */
+  const isCalendar = view === 'calendar';
   const columns = isCalendar
     ? ['date', 'day', 'startTime', 'endTime', 'courseCode', 'courseTitle', 'program', 'semester', 'section', 'shift', 'teacher', 'room']
     : ['date', 'day', 'startTime', 'endTime', 'program', 'semester', 'section', 'shift', 'courseCode', 'courseTitle', 'teacher', 'room'];
 
   const heads = {
-    date: 'Date',
-    day: 'Day',
-    startTime: 'Start',
-    endTime: 'End',
-    program: 'Program',
-    semester: 'Sem.',
-    section: 'Sec.',
-    shift: 'Shift',
-    courseCode: 'Code',
-    courseTitle: 'Course Title',
-    teacher: 'Teacher / Invigilator',
-    room: 'Room'
+    date: 'Date', day: 'Day', startTime: 'Start', endTime: 'End',
+    program: 'Program', semester: 'Sem.', section: 'Sec.', shift: 'Shift',
+    courseCode: 'Code', courseTitle: 'Course Title',
+    teacher: 'Teacher / Invigilator', room: 'Room'
   };
 
   return `<table class="print-table">
@@ -217,97 +234,291 @@ function buildPrintTable(rows) {
     </thead>
     <tbody>
       ${rows.map(r => `<tr>${columns.map(c => {
-        const safeVal = c === 'teacher' ? (r.teacher && r.teacher.trim() ? r.teacher : 'Not Available') : (r[c] ?? '');
+        const safeVal = c === 'teacher'
+          ? (r.teacher && r.teacher.trim() ? r.teacher : 'Not Available')
+          : (r[c] ?? '');
         return `<td>${esc(safeVal)}</td>`;
       }).join('')}</tr>`).join('')}
     </tbody>
   </table>`;
 }
 
-function renderPrintDocument() {
-  const rows = getCurrentPrintRows();
-  const meta = getPrintMeta(rows);
-  const printDoc = document.getElementById('printDocument') || document.createElement('div');
+/* Build the full signature footer HTML */
+function buildSignatureFooter() {
+  return `<div class="print-footer">
+    <div class="print-signature">
+      <strong>HOD / Head of Department</strong>
+      <div class="sig-row"><span class="sig-label">Signature:</span><span class="line"></span></div>
+      <div class="sig-row"><span class="sig-label">Name:</span><span class="line"></span></div>
+      <div class="sig-row"><span class="sig-label">Date:</span><span class="line"></span></div>
+    </div>
+    <div class="print-signature">
+      <strong>Examination Coordinator</strong>
+      <div class="sig-row"><span class="sig-label">Signature:</span><span class="line"></span></div>
+      <div class="sig-row"><span class="sig-label">Name:</span><span class="line"></span></div>
+      <div class="sig-row"><span class="sig-label">Date:</span><span class="line"></span></div>
+    </div>
+  </div>`;
+}
+
+/* Build the full print header HTML from a meta object */
+function buildPrintHeader(meta) {
+  return `<div class="print-header">
+    <div class="print-title">${esc(meta.title)}</div>
+    <div class="print-department">${esc(meta.department)}</div>
+    <div class="print-heading">${esc(meta.heading)}</div>
+    <div class="print-subheading">${esc(meta.semesterLabel)}</div>
+    <div class="print-subheading">${esc(meta.subtitle || 'Complete Examination Date Sheet')}</div>
+    ${meta.detail ? `<div class="print-context">${esc(meta.detail)}</div>` : ''}
+    <div class="print-meta">
+      <span>${esc(meta.period)}</span>
+      <span>${esc(meta.generatedOn)}</span>
+    </div>
+    <div class="print-divider"></div>
+  </div>`;
+}
+
+/* Assemble or refresh the hidden #printDocument element */
+function buildPrintDocument(rows, meta) {
+  // Remove any stale print document first
+  const stale = document.getElementById('printDocument');
+  if (stale) stale.remove();
+
+  const printDoc = document.createElement('div');
   printDoc.id = 'printDocument';
   printDoc.className = 'print-sheet';
-  printDoc.innerHTML = `
-    <div class="print-header">
-      <div class="print-title">${esc(meta.title)}</div>
-      <div class="print-department">${esc(meta.department)}</div>
-      <div class="print-heading">${esc(meta.heading)}</div>
-      <div class="print-subheading">${esc(meta.semesterLabel)}</div>
-      <div class="print-subheading">${esc(meta.subtitle || 'Complete Examination Date Sheet')}</div>
-      ${meta.detail ? `<div class="print-context">${esc(meta.detail)}</div>` : ''}
-      <div class="print-meta">
-        <span>${esc(meta.period)}</span>
-        <span>${esc(meta.generatedOn)}</span>
-      </div>
-      <div class="print-divider"></div>
-    </div>
-    ${buildPrintTable(rows)}
-    <div class="print-footer">
-      <div class="print-signature">
-        <strong>HOD / Head of Department</strong>
-        <div>Signature: <span class="line"></span></div>
-        <div>Name: <span class="line"></span></div>
-        <div>Date: <span class="line"></span></div>
-      </div>
-      <div class="print-signature">
-        <strong>Examination Coordinator</strong>
-        <div>Signature: <span class="line"></span></div>
-        <div>Name: <span class="line"></span></div>
-        <div>Date: <span class="line"></span></div>
-      </div>
-    </div>
-  `;
+  printDoc.innerHTML = buildPrintHeader(meta) + buildPrintTable(rows) + buildSignatureFooter();
   document.body.appendChild(printDoc);
-  document.body.classList.add('print-mode');
   return printDoc;
 }
 
+/* Open browser print dialog */
 function triggerPrint(rows, metaOverride) {
-  const rowsToPrint = rows && rows.length ? rows : getCurrentPrintRows();
-  if (!rowsToPrint.length) return;
-  if (metaOverride) {
-    const override = { title: 'EMERSON UNIVERSITY MULTAN', department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES', heading: 'MID-TERM EXAMINATION DATE SHEET', semesterLabel: 'FALL SEMESTER 2026', period: view === 'complete' ? 'Examination period: 28 October 2026 to 6 November 2026' : periodForRows(rowsToPrint), ...metaOverride };
-    const printDoc = document.getElementById('printDocument') || document.createElement('div');
-    printDoc.id = 'printDocument';
-    printDoc.className = 'print-sheet';
-    printDoc.innerHTML = `
-      <div class="print-header">
-        <div class="print-title">${esc(override.title)}</div>
-        <div class="print-department">${esc(override.department)}</div>
-        <div class="print-heading">${esc(override.heading)}</div>
-        <div class="print-subheading">${esc(override.semesterLabel)}</div>
-        <div class="print-subheading">${esc(override.subtitle || 'Complete Examination Date Sheet')}</div>
-        ${override.detail ? `<div class="print-context">${esc(override.detail)}</div>` : ''}
-        <div class="print-meta">
-          <span>${esc(override.period || 'Examination period: 28 October 2026 to 6 November 2026')}</span>
-          <span>${esc(override.generatedOn || `Date sheet generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`)}</span>
-        </div>
-        <div class="print-divider"></div>
-      </div>
-      ${buildPrintTable(rowsToPrint)}
-      <div class="print-footer">
-        <div class="print-signature"><strong>HOD / Head of Department</strong><div>Signature: <span class="line"></span></div><div>Name: <span class="line"></span></div><div>Date: <span class="line"></span></div></div>
-        <div class="print-signature"><strong>Examination Coordinator</strong><div>Signature: <span class="line"></span></div><div>Name: <span class="line"></span></div><div>Date: <span class="line"></span></div></div>
-      </div>
-    `;
-    document.body.appendChild(printDoc);
-    document.body.classList.add('print-mode');
-    window.print();
+  const rowsToPrint = (rows && rows.length) ? rows : getCurrentPrintRows();
+  if (!rowsToPrint.length) {
+    alert('No records selected. Please select a teacher or class first.');
     return;
   }
-  renderPrintDocument();
+
+  const baseMeta = {
+    title: 'EMERSON UNIVERSITY MULTAN',
+    department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES',
+    heading: 'MID-TERM EXAMINATION DATE SHEET',
+    semesterLabel: 'FALL SEMESTER 2026',
+    period: periodForRows(rowsToPrint),
+    generatedOn: `Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`
+  };
+
+  const meta = metaOverride ? { ...baseMeta, ...metaOverride } : getPrintMeta(rowsToPrint);
+
+  buildPrintDocument(rowsToPrint, meta);
+  document.body.classList.add('print-mode');
   window.print();
 }
 
+/* Clean up after printing */
 window.addEventListener('afterprint', () => {
   document.body.classList.remove('print-mode');
   const printDoc = document.getElementById('printDocument');
   if (printDoc) printDoc.remove();
 });
 
+/* ============================================================
+   PDF DOWNLOAD  — directly saves a .pdf file via jsPDF
+   ============================================================ */
+function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf') {
+  if (!rows || !rows.length) {
+    alert('No records to export. Please make a selection first.');
+    return;
+  }
+  if (!window.jspdf?.jsPDF || typeof window.jspdf.jsPDF.prototype.autoTable !== 'function') {
+    alert('PDF library is still loading. Please wait a moment and try again.');
+    return;
+  }
+
+  const isTeacher = view === 'teacher';
+  const isClass = view === 'class';
+
+  // Use landscape for most, portrait for class (fewer columns)
+  const orientation = isClass ? 'portrait' : 'landscape';
+  const pageW = isClass ? 210 : 297;
+  const pageH = isClass ? 297 : 210;
+  const margin = 14;
+  const usableW = pageW - margin * 2;
+
+  const doc = new window.jspdf.jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const cx = pageW / 2;
+
+  const title   = meta.title   || 'EMERSON UNIVERSITY MULTAN';
+  const dept    = meta.department || 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES';
+  const heading = meta.heading  || 'MID-TERM EXAMINATION DATE SHEET';
+  const semLbl  = meta.semesterLabel || 'FALL SEMESTER 2026';
+  const subtitle = meta.subtitle || 'Examination Date Sheet';
+  const detail  = meta.detail   || '';
+  const period  = meta.period   || periodForRows(rows);
+  const genDate = `Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+
+  let y = 14;
+
+  // Title block
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 0, 0);
+
+  doc.setFontSize(15);
+  doc.text(title, cx, y, { align: 'center' }); y += 6.5;
+
+  doc.setFontSize(9.5);
+  doc.text(dept, cx, y, { align: 'center' }); y += 5.5;
+
+  doc.setFontSize(11.5);
+  doc.text(heading, cx, y, { align: 'center' }); y += 5.5;
+
+  doc.setFontSize(10);
+  doc.text(semLbl, cx, y, { align: 'center' }); y += 5;
+
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, pageW - margin, y); y += 5;
+
+  doc.setFontSize(10.5);
+  doc.text(subtitle, cx, y, { align: 'center' }); y += 5.5;
+
+  if (detail) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(detail, cx, y, { align: 'center' }); y += 5;
+  }
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(60, 60, 60);
+  doc.text(period, margin, y);
+  doc.text(genDate, pageW - margin, y, { align: 'right' }); y += 5;
+
+  doc.setDrawColor(180);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, pageW - margin, y); y += 3;
+
+  // Table definition per view type
+  let head, body;
+
+  if (isClass) {
+    head = [['Sr.', 'Date', 'Day', 'Time', 'Course Code', 'Course Title', 'Room']];
+    body = rows.map((r, i) => [
+      i + 1,
+      formatDate(r.date),
+      r.day || '',
+      `${r.startTime} – ${r.endTime}`,
+      r.courseCode || 'N/A',
+      r.courseTitle || 'N/A',
+      r.room || 'N/A'
+    ]);
+  } else if (isTeacher) {
+    head = [['Sr.', 'Date', 'Day', 'Time', 'Program', 'Sem.', 'Sec.', 'Shift', 'Course Code', 'Course Title', 'Room']];
+    body = rows.map((r, i) => [
+      i + 1,
+      formatDate(r.date),
+      r.day || '',
+      `${r.startTime} – ${r.endTime}`,
+      r.program || '',
+      r.semester || '',
+      r.section || '',
+      r.shift || '',
+      r.courseCode || 'N/A',
+      r.courseTitle || 'N/A',
+      r.room || 'N/A'
+    ]);
+  } else {
+    head = [['Sr.', 'Date', 'Day', 'Time', 'Program', 'Sem.', 'Sec.', 'Shift', 'Course Code', 'Course Title', 'Teacher / Invigilator', 'Room']];
+    body = rows.map((r, i) => [
+      i + 1,
+      formatDate(r.date),
+      r.day || '',
+      `${r.startTime} – ${r.endTime}`,
+      r.program || '',
+      r.semester || '',
+      r.section || '',
+      r.shift || '',
+      r.courseCode || 'N/A',
+      r.courseTitle || 'N/A',
+      (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available',
+      r.room || 'N/A'
+    ]);
+  }
+
+  doc.autoTable({
+    startY: y,
+    margin: { left: margin, right: margin },
+    head,
+    body,
+    theme: 'grid',
+    styles: {
+      fontSize: isClass ? 8.5 : 7.2,
+      cellPadding: 2,
+      textColor: [0, 0, 0],
+      overflow: 'linebreak'
+    },
+    headStyles: {
+      fillColor: [220, 232, 240],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold',
+      fontSize: isClass ? 8 : 6.8,
+    },
+    rowPageBreak: 'avoid',
+    didDrawPage: (hookData) => {
+      // Repeat page number at bottom of each page
+      const pgCount = doc.internal.getNumberOfPages();
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(100);
+      doc.text(`Page ${hookData.pageNumber} of ${pgCount}`, pageW - margin, pageH - 6, { align: 'right' });
+      doc.text('Emerson University Multan — FCET', margin, pageH - 6);
+    }
+  });
+
+  // Signature footer — place after table on last page
+  const finalY = doc.lastAutoTable?.finalY || y + 40;
+  const footerY = Math.min(finalY + 12, pageH - 40);
+
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  doc.setTextColor(0);
+
+  // HOD signature block (left)
+  const col1x = margin;
+  const col2x = pageW / 2 + 10;
+  const lineLen = usableW / 2 - 30;
+
+  doc.line(col1x, footerY, col1x + lineLen, footerY);
+  doc.line(col2x, footerY, col2x + lineLen, footerY);
+
+  doc.text('HOD / Head of Department', col1x + lineLen / 2, footerY + 5, { align: 'center' });
+  doc.text('Examination Coordinator', col2x + lineLen / 2, footerY + 5, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  const sigLabels = ['Signature:', 'Name:', 'Date:'];
+  sigLabels.forEach((label, idx) => {
+    const rowY = footerY + 13 + idx * 8;
+    doc.text(`${label}`, col1x, rowY);
+    doc.line(col1x + 18, rowY + 0.5, col1x + lineLen, rowY + 0.5);
+    doc.text(`${label}`, col2x, rowY);
+    doc.line(col2x + 18, rowY + 0.5, col2x + lineLen, rowY + 0.5);
+  });
+
+  doc.save(filename);
+}
+
+/* Generate a clean filename */
+function pdfFilename(prefix, parts) {
+  return `${prefix}_${parts.filter(Boolean).map(s => safe(String(s))).join('_')}_Fall_2026.pdf`;
+}
+
+/* ============================================================
+   FILTER PANEL  (Complete date sheet)
+   ============================================================ */
 function filters() {
   return `<div class="filters">
     <div class="field"><label>Date</label><input id="f-date" type="date"></div>
@@ -323,8 +534,8 @@ function filters() {
   <div class="toolbar no-print" style="margin-top:14px">
     <button class="primary" id="apply">Apply filters</button>
     <button class="secondary" id="reset">Reset filters</button>
-    <button class="secondary" id="csv">Export CSV</button>
     <button class="secondary" id="print">Print results</button>
+    <button class="secondary" id="pdfDownload">Download PDF</button>
   </div>`;
 }
 
@@ -364,6 +575,9 @@ function filtered() {
   }).sort(sortBySchedule);
 }
 
+/* ============================================================
+   VIEW: Complete date sheet
+   ============================================================ */
 function complete() {
   app.innerHTML = layout(
     'Complete date sheet',
@@ -385,14 +599,30 @@ function bindComplete() {
     document.querySelectorAll('.filters input, .filters select').forEach(e => { e.value = ''; });
     render();
   };
-  $('#csv').onclick = () => download(filtered(), 'CSET_Complete_Date_Sheet_Fall_2026.csv');
-  $('#print').onclick = () => triggerPrint(filtered(), { subtitle: 'Complete Examination Date Sheet', detail: `${filtered().length} records` });
+  $('#print').onclick = () => {
+    const res = filtered();
+    triggerPrint(res, {
+      subtitle: 'Complete Examination Date Sheet',
+      detail: `Total records: ${res.length}`
+    });
+  };
+  $('#pdfDownload').onclick = () => {
+    const res = filtered();
+    downloadPdf(
+      res,
+      { subtitle: 'Complete Examination Date Sheet', detail: `Total records: ${res.length}` },
+      pdfFilename('Complete_Examination', [])
+    );
+  };
 }
 
 function selector(label, id, values) {
   return `<div class="field"><label>${label}</label><select id="${id}">${opts(values, 'Select ' + label)}</select></div>`;
 }
 
+/* ============================================================
+   VIEW: Teacher date sheets
+   ============================================================ */
 function teacher() {
   app.innerHTML = layout(
     'Teacher date sheets',
@@ -400,26 +630,40 @@ function teacher() {
     <div class="toolbar">
       ${selector('Teacher', 'teacherSelect', getTeachers())}
       <button class="primary" id="viewTeacher">View schedule</button>
-      <button class="secondary" id="teacherCsv">Download CSV</button>
       <button class="secondary" id="teacherPrint">Print</button>
+      <button class="secondary" id="teacherPdf">Download PDF</button>
     </div>
     <div id="teacherResult" style="margin-top:18px"></div>`
   );
   $('#viewTeacher').onclick = renderTeacher;
   $('#teacherSelect').onchange = renderTeacher;
+
   $('#teacherPrint').onclick = () => {
-    if (selected.length) {
-      triggerPrint(selected, {
-        subtitle: 'Teacher-Wise Examination Date Sheet',
-        detail: `${$('#teacherSelect').value} · ${selected.length} papers`
-      });
+    if (!selected.length) {
+      alert('Please select a teacher first.');
+      return;
     }
+    const teacherName = $('#teacherSelect').value;
+    triggerPrint(selected, {
+      subtitle: 'Teacher-Wise Examination Date Sheet',
+      detail: `Teacher / Invigilator: ${teacherName}`
+    });
   };
-  $('#teacherCsv').onclick = () => {
-    if (selected.length) {
-      const t = $('#teacherSelect').value;
-      download(selected, `Teacher_${safe(t)}_Fall_2026.csv`);
+
+  $('#teacherPdf').onclick = () => {
+    if (!selected.length) {
+      alert('Please select a teacher first.');
+      return;
     }
+    const teacherName = $('#teacherSelect').value;
+    downloadPdf(
+      selected,
+      {
+        subtitle: 'Teacher-Wise Examination Date Sheet',
+        detail: `Teacher / Invigilator: ${teacherName}`
+      },
+      pdfFilename('Teacher', [teacherName])
+    );
   };
 }
 
@@ -438,6 +682,9 @@ function renderTeacher() {
   $('#teacherResult').innerHTML = `<h3>${esc(t)} · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>${table(selected, true)}`;
 }
 
+/* ============================================================
+   VIEW: Program-wise date sheets
+   ============================================================ */
 function program() {
   app.innerHTML = layout(
     'Program-wise date sheets',
@@ -448,8 +695,8 @@ function program() {
       ${selector('Section', 'programSec', uniq('section'))}
       ${selector('Shift', 'programShift', uniq('shift'))}
       <button class="primary" id="programView">View date sheet</button>
-      <button class="secondary" id="programCsv">Export CSV</button>
       <button class="secondary" id="programPrint">Print</button>
+      <button class="secondary" id="programPdf">Download PDF</button>
     </div>
     <div id="programResult" style="margin-top:18px"></div>`
   );
@@ -458,19 +705,41 @@ function program() {
   $('#programSem').onchange = renderProgram;
   $('#programSec').onchange = renderProgram;
   $('#programShift').onchange = renderProgram;
+
   $('#programPrint').onclick = () => {
-    if (selected.length) {
-      triggerPrint(selected, {
-        subtitle: 'Program-Wise Examination Date Sheet',
-        detail: `${$('#programSelect').value}${$('#programSem').value ? ` · Semester ${$('#programSem').value}` : ''}${$('#programSec').value ? ` · Section ${$('#programSec').value}` : ''}${$('#programShift').value ? ` · ${$('#programShift').value}` : ''}`
-      });
+    if (!selected.length) {
+      alert('Please select a program first.');
+      return;
     }
+    const p = $('#programSelect').value;
+    const sem = $('#programSem').value;
+    const sec = $('#programSec').value;
+    const shift = $('#programShift').value;
+    let detail = p;
+    if (sem) detail += ` · Semester ${sem}`;
+    if (sec) detail += ` · Section ${sec}`;
+    if (shift) detail += ` · ${shift}`;
+    triggerPrint(selected, { subtitle: 'Program-Wise Examination Date Sheet', detail });
   };
-  $('#programCsv').onclick = () => {
-    if (selected.length) {
-      const p = $('#programSelect').value;
-      download(selected, `Program_${safe(p)}_Date_Sheet.csv`);
+
+  $('#programPdf').onclick = () => {
+    if (!selected.length) {
+      alert('Please select a program first.');
+      return;
     }
+    const p = $('#programSelect').value;
+    const sem = $('#programSem').value;
+    const sec = $('#programSec').value;
+    const shift = $('#programShift').value;
+    let detail = p;
+    if (sem) detail += ` · Semester ${sem}`;
+    if (sec) detail += ` · Section ${sec}`;
+    if (shift) detail += ` · ${shift}`;
+    downloadPdf(
+      selected,
+      { subtitle: 'Program-Wise Examination Date Sheet', detail },
+      pdfFilename('Program', [p, sem, sec, shift])
+    );
   };
 }
 
@@ -501,6 +770,9 @@ function renderProgram() {
   $('#programResult').innerHTML = `<h3>${subtitle} · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>${table(selected)}`;
 }
 
+/* ============================================================
+   VIEW: Class-wise date sheets
+   ============================================================ */
 function classView() {
   app.innerHTML = layout(
     'Class-wise date sheets',
@@ -511,8 +783,8 @@ function classView() {
       ${selector('Section', 'classSec', uniq('section'))}
       ${selector('Shift', 'classSh', uniq('shift'))}
       <button class="primary" id="classSubmit">View class sheet</button>
-      <button class="secondary" id="classCsv">Export CSV</button>
       <button class="secondary" id="classPrint">Print</button>
+      <button class="secondary" id="classPdf" title="Download selected class as PDF">Download PDF</button>
     </div>
     <div id="classResult" style="margin-top:18px"></div>`
   );
@@ -549,25 +821,45 @@ function classView() {
   $('#classS').onchange = renderClass;
   $('#classSec').onchange = renderClass;
   $('#classSh').onchange = renderClass;
+
   $('#classPrint').onclick = () => {
-    if (selected.length) {
-      triggerPrint(selected, {
-        subtitle: 'Class-Wise Examination Date Sheet',
-        detail: `${$('#classP').value} · Semester ${$('#classS').value} · Section ${$('#classSec').value} · ${$('#classSh').value}`
-      });
+    if (!selected.length) {
+      alert('Please select all four class attributes first.');
+      return;
     }
+    const p = $('#classP').value;
+    const s = $('#classS').value;
+    const sec = $('#classSec').value;
+    const sh = $('#classSh').value;
+    triggerPrint(selected, {
+      subtitle: 'Class-Wise Examination Date Sheet',
+      detail: `${p} · Semester ${s} · Section ${sec} · ${sh} Shift`
+    });
   };
-  $('#classCsv').onclick = () => {
-    if (selected.length) {
-      const p = $('#classP').value;
-      const s = $('#classS').value;
-      const sec = $('#classSec').value;
-      const sh = $('#classSh').value;
-      download(selected, `Class_${safe(p)}_Sem_${s}_Sec_${sec}_${safe(sh)}_Date_Sheet.csv`);
+
+  $('#classPdf').onclick = () => {
+    if (!selected.length) {
+      alert('Please select all four class attributes first.');
+      return;
     }
+    const p = $('#classP').value;
+    const s = $('#classS').value;
+    const sec = $('#classSec').value;
+    const sh = $('#classSh').value;
+    downloadPdf(
+      selected,
+      {
+        subtitle: 'Class-Wise Examination Date Sheet',
+        detail: `${p} · Semester ${s} · Section ${sec} · ${sh} Shift`
+      },
+      pdfFilename(safe(p), [`Semester_${s}`, `Section_${sec}`, sh])
+    );
   };
 }
 
+/* ============================================================
+   VIEW: Examination calendar
+   ============================================================ */
 function calendar() {
   const groups = {};
   const tFilter = $('#calTeacher')?.value || '';
@@ -620,14 +912,16 @@ function calendar() {
   $('#calTeacher').onchange = calendar;
   $('#calProgram').onchange = calendar;
   $('#calPrint').onclick = () => {
-    const rows = matched;
-    triggerPrint(rows, {
+    triggerPrint(matched, {
       subtitle: 'Examination Calendar',
       detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
     });
   };
 }
 
+/* ============================================================
+   VIEW: Dashboard
+   ============================================================ */
 function dashboard() {
   app.innerHTML = stats() + layout(
     'Portal overview',
@@ -642,6 +936,9 @@ function dashboard() {
   );
 }
 
+/* ============================================================
+   ROUTING
+   ============================================================ */
 function show(v) {
   view = v;
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
@@ -651,8 +948,7 @@ function show(v) {
     teacher,
     program,
     class: classView,
-    calendar,
-    print: complete
+    calendar
   };
   (views[v] || dashboard)();
 }
@@ -665,6 +961,9 @@ $('#theme').onclick = () => {
   document.body.classList.toggle('dark');
 };
 
+/* ============================================================
+   INIT
+   ============================================================ */
 function initApp() {
   if (window.EXAM_DATA && Array.isArray(window.EXAM_DATA) && window.EXAM_DATA.length > 0) {
     data = window.EXAM_DATA;

@@ -1,5 +1,9 @@
 ## PAGE 1
 
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
+
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 3 | 29-10-2026 | 1:00 PM–2:30 PM | BS Artificial Intelligence | Evening | Semester 3 | A | SOCI-2101 | Civics and Community Engagement | CTB1F-04 | 57 | Miss Afshan Qureshi |
@@ -22,7 +26,17 @@
 | 3 | 05-11-2026 | 1:00 PM–2:30 PM | BS Artificial Intelligence | Evening | Semester 4 | A | STAT-2183 | Probability & Statistics | CTB2G-11 | 47 | Dr Shahbaz Nawaz |
 | 3 | 06-11-2026 | 1:00 PM–2:30 PM | BS Artificial Intelligence | Evening | Semester 4 | A | COSC-2107 | Information Security | CTB2G-11 | 47 | Mr Sadia Ramzan |
 
+### Additional printed text
+- `BSAI · Semester 3 · Session Fall 2025-2029 · Sec A · Evening`
+- `BSAI · Semester 3 · Session Fall 2025-2029 · Sec A · Morning`
+- `BSAI · Semester 4 · Session Spring 2025-2029 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 2
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -51,7 +65,18 @@
 | 2 | 05-11-2026 | 11:00 AM–12:30 PM | BS Artificial Intelligence | Morning | Semester 5 | B | ARIT-3132 | Machine Learning | CTB1F-01 | 53 | Dr. Samina Naz |
 | 2 | 06-11-2026 | 11:00 AM–12:30 PM | BS Artificial Intelligence | Morning | Semester 5 | B | MATH-3182 | Linear Algebra | CTB1F-01 | 53 | Muhammad Naeem |
 
+### Additional printed text
+- `BSAI · Semester 5 · Session Fall 2024-2028 · Sec A · Evening`
+- `BSAI · Semester 5 · Session Fall 2024-2028 · Sec A · Morning`
+- `BSAI · Semester 5 · Session Fall 2024-2028 · Sec B · Evening`
+- `BSAI · Semester 5 · Session Fall 2024-2028 · Sec B · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 3
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -79,7 +104,18 @@
 | 1 | 05-11-2026 | 9:00 AM–10:30 AM | BS Computer Science | Morning | Semester 3 | A | SOCI-2101 | Civics and Community Engagement | CTB1F-04 | 55 | Nida Shiza |
 | 1 | 06-11-2026 | 9:00 AM–10:30 AM | BS Computer Science | Morning | Semester 3 | A | ARAB-2101 | Fehm-e-Quran II | CTB1F-04 | 55 | Miss Qudsia Khanam |
 
+### Additional printed text
+- `BSAI · Semester 7 · Session Fall 2023-2027 · Sec A · Evening`
+- `BSAI · Semester 7 · Session Fall 2023-2027 · Sec A · Morning`
+- `BSCS · Semester 3 · Session Fall 2025-2029 · Sec A · Evening`
+- `BSCS · Semester 3 · Session Fall 2025-2029 · Sec A · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 4
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -108,7 +144,18 @@
 | 3 | 05-11-2026 | 1:00 PM–2:30 PM | BS Computer Science | Evening | Semester 5 | B | COSE-3141 | WEB Technologies | CTB3F-16 | 47 | Miss Farzeen Khan |
 | 3 | 06-11-2026 | 1:00 PM–2:30 PM | BS Computer Science | Evening | Semester 5 | B | MATH-3182 | Linear Algebra | CTB3F-16 | 47 | Ruqia Ghafoor |
 
+### Additional printed text
+- `BSCS · Semester 4 · Session Spring 2025-2029 · Sec A · Evening`
+- `BSCS · Semester 5 · Session Fall 2024-2028 · Sec A · Evening`
+- `BSCS · Semester 5 · Session Fall 2024-2028 · Sec A · Morning`
+- `BSCS · Semester 5 · Session Fall 2024-2028 · Sec B · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 5
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -135,7 +182,18 @@
 | 1 | 05-11-2026 | 9:00 AM–10:30 AM | BS Computer Science | Morning | Semester 7 | A | COSC-4113 | Analysis of Algorithms | CTB2G-15 | 54 | Mr Mirza Murad Baig |
 | 1 | 06-11-2026 | 9:00 AM–10:30 AM | BS Computer Science | Morning | Semester 7 | A | FLNG-41XX | Foreign Language | CTB2G-15 | 54 | Mr Muhammad Inam Makki Khan |
 
+### Additional printed text
+- `BSCS · Semester 5 · Session Fall 2024-2028 · Sec B · Morning`
+- `BSCS · Semester 5 · Session Fall 2024-2028 · Sec C · Morning`
+- `BSCS · Semester 7 · Session Fall 2023-2027 · Sec A · Evening`
+- `BSCS · Semester 7 · Session Fall 2023-2027 · Sec A · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 6
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -164,7 +222,17 @@
 | 3 | 05-11-2026 | 1:00 PM–2:30 PM | BS Computer Science with Specialization Tracks | Evening | Semester 1 | CYB-A | COSC-1101 | Application of Information and Communication Technology | CTB1F-02 | 50 | Dr. Sohail Raza |
 | 3 | 06-11-2026 | 1:00 PM–2:30 PM | BS Computer Science with Specialization Tracks | Evening | Semester 1 | CYB-A | UOHQ-1107 | Fehm-e-Quran I | CTB1F-02 | 50 | Dr. Muhammad Shahid Khan |
 
+### Additional printed text
+- `BSCS_SPECIALIZATION · Semester 1 · Session Fall 2026-2030 · Sec AI-A · Morning`
+- `BSCS_SPECIALIZATION · Semester 1 · Session Fall 2026-2030 · Sec CS-A · Morning`
+- `BSCS_SPECIALIZATION · Semester 1 · Session Fall 2026-2030 · Sec CYB-A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 7
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -193,7 +261,17 @@
 | 3 | 05-11-2026 | 1:00 PM–2:30 PM | BS Computer Science with Specialization Tracks | Evening | Semester 1 | SE-A | GEQR-1101 | Discrete Structures (Quantitative Reasoning I) | CTB1F-03 | 50 | Dr. Binish Raza |
 | 3 | 06-11-2026 | 1:00 PM–2:30 PM | BS Computer Science with Specialization Tracks | Evening | Semester 1 | SE-A | UOHQ-1107 | Fehm-e-Quran I | CTB1F-03 | 50 | Hafiz Omer Farooq |
 
+### Additional printed text
+- `BSCS_SPECIALIZATION · Semester 1 · Session Fall 2026-2030 · Sec DS-A · Evening`
+- `BSCS_SPECIALIZATION · Semester 1 · Session Fall 2026-2030 · Sec IT-A · Morning`
+- `BSCS_SPECIALIZATION · Semester 1 · Session Fall 2026-2030 · Sec SE-A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 8
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -217,7 +295,17 @@
 | 2 | 05-11-2026 | 11:00 AM–12:30 PM | BS Cyber Security | Evening | Semester 4 | A | BUAD-2101 | Entrepreneurship | CTB2G-13 | 40 | Mr Zafar Ahmad |
 | 2 | 06-11-2026 | 11:00 AM–12:30 PM | BS Cyber Security | Evening | Semester 4 | A | STAT-2183 | Probability & Statistics | CTB2G-13 | 40 | Maryum Shakeel |
 
+### Additional printed text
+- `BSCYB · Semester 3 · Session Fall 2025-2029 · Sec A · Evening`
+- `BSCYB · Semester 3 · Session Fall 2025-2029 · Sec A · Morning`
+- `BSCYB · Semester 4 · Session Spring 2025-2029 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 9
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -245,7 +333,18 @@
 | 4 | 05-11-2026 | 3:00 PM–4:30 PM | BS Cyber Security | Evening | Semester 7 | A | COSC-4113 | Analysis of Algorithms | CTB1F-03 | 46 | Miss Kiran  Shahzadi |
 | 4 | 06-11-2026 | 3:00 PM–4:30 PM | BS Cyber Security | Evening | Semester 7 | A | FLNG-41XX | Foreign Language | CTB1F-03 | 46 | Muhammad Ashraf |
 
+### Additional printed text
+- `BSCYB · Semester 5 · Session Fall 2024-2028 · Sec A · Evening`
+- `BSCYB · Semester 5 · Session Fall 2024-2028 · Sec A · Morning`
+- `BSCYB · Semester 5 · Session Fall 2024-2028 · Sec B · Morning`
+- `BSCYB · Semester 7 · Session Fall 2023-2027 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 10
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -274,7 +373,18 @@
 | 2 | 05-11-2026 | 11:00 AM–12:30 PM | BS Data Science | Evening | Semester 4 | A | COSC-2107 | Information Security | CTB1F-07 | 42 | Rabia Tariq |
 | 2 | 06-11-2026 | 11:00 AM–12:30 PM | BS Data Science | Evening | Semester 4 | A | COSC-2108 | Artificial Intelligence | CTB1F-07 | 42 | Aoun Muhammad (Computing) |
 
+### Additional printed text
+- `BSCYB · Semester 7 · Session Fall 2023-2027 · Sec A · Morning`
+- `BSDS · Semester 3 · Session Fall 2025-2029 · Sec A · Evening`
+- `BSDS · Semester 3 · Session Fall 2025-2029 · Sec A · Morning`
+- `BSDS · Semester 4 · Session Spring 2025-2029 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 11
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -303,7 +413,18 @@
 | 1 | 05-11-2026 | 9:00 AM–10:30 AM | BS Data Science | Morning | Semester 6 | A | MATH-3181 | Multivariable Calculus | CTB1F-02 | 13 | Ruqia Ghafoor |
 | 1 | 06-11-2026 | 9:00 AM–10:30 AM | BS Data Science | Morning | Semester 6 | A | ENGL-3184 | Technical & Business Writing | CTB1F-02 | 13 | Muntaha Zubair |
 
+### Additional printed text
+- `BSDS · Semester 5 · Session Fall 2024-2028 · Sec A · Evening`
+- `BSDS · Semester 5 · Session Fall 2024-2028 · Sec A · Morning`
+- `BSDS · Semester 5 · Session Fall 2024-2028 · Sec B · Morning`
+- `BSDS · Semester 6 · Session Spring 2024-2028 · Sec A · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 12
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -331,7 +452,18 @@
 | 2 | 04-11-2026 | 11:00 AM–12:30 PM | BS Information Technology | Morning | Semester 3 | A | INTE-3135 | IT Infrastructure | CTB1F-08 | 53 | Mr Muhammad Jasim Shah |
 | 2 | 05-11-2026 | 11:00 AM–12:30 PM | BS Information Technology | Morning | Semester 3 | A | SOCI-2101 | Civics and Community Engagement | CTB1F-08 | 53 | Miss Rabia |
 
+### Additional printed text
+- `BSDS · Semester 7 · Session Fall 2023-2027 · Sec A · Evening`
+- `BSDS · Semester 7 · Session Fall 2023-2027 · Sec A · Morning`
+- `BSIT · Semester 3 · Session Fall 2025-2029 · Sec A · Evening`
+- `BSIT · Semester 3 · Session Fall 2025-2029 · Sec A · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 13
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -360,7 +492,18 @@
 | 3 | 05-11-2026 | 1:00 PM–2:30 PM | BS Information Technology | Evening | Semester 5 | B | INTE-3134 | System & Network Administration | CTB2G-10 | 52 | Mr Faisal Shahzad |
 | 3 | 06-11-2026 | 1:00 PM–2:30 PM | BS Information Technology | Evening | Semester 5 | B | STAT-2183 | Probability & Statistics | CTB2G-10 | 52 | Anam Ashraf |
 
+### Additional printed text
+- `BSIT · Semester 4 · Session Spring 2025-2029 · Sec A · Evening`
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec A · Evening`
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec A · Morning`
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec B · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 14
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -389,7 +532,18 @@
 | 2 | 05-11-2026 | 11:00 AM–12:30 PM | BS Information Technology | Morning | Semester 5 | E | STAT-2183 | Probability & Statistics | CTB2G-11 | 25 | Mr Abdul Manan |
 | 2 | 06-11-2026 | 11:00 AM–12:30 PM | BS Information Technology | Morning | Semester 5 | E | COSC-3112 | Operating Systems | CTB2G-11 | 25 | Mr Muhammad Usman Haider |
 
+### Additional printed text
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec B · Morning`
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec C · Morning`
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec D · Morning`
+- `BSIT · Semester 5 · Session Fall 2024-2028 · Sec E · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 15
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -415,7 +569,18 @@
 | 1 | 05-11-2026 | 9:00 AM–10:30 AM | BSIT ADP 2 Year | Morning | Semester 7 | A | INTE-4132 | Cyber Security | CTB2G-10 | 47 | Miss Aleena shafqat |
 | 1 | 06-11-2026 | 9:00 AM–10:30 AM | BSIT ADP 2 Year | Morning | Semester 7 | A | COSC-2116 | Professional Practices | CTB2G-10 | 47 | Mr Mirza Murad Baig |
 
+### Additional printed text
+- `BSIT · Semester 7 · Session Fall 2023-2027 · Sec A · Evening`
+- `BSIT · Semester 7 · Session Fall 2023-2027 · Sec A · Morning`
+- `BSIT · Semester 8 · Session Spring 2023-2027 · Sec A · Evening`
+- `BSIT_ADP · Semester 7 · Session Fall 2025-2027 · Sec A · Morning`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 16
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -439,7 +604,17 @@
 | 2 | 05-11-2026 | 11:00 AM–12:30 PM | BS Software Engineering | Evening | Semester 4 | A | BUAD-2101 | Entrepreneurship | CTB1F-02 | 47 | Miss Amna Ahmad |
 | 2 | 06-11-2026 | 11:00 AM–12:30 PM | BS Software Engineering | Evening | Semester 4 | A | SOEN-2135 | Software Requirement Engineering | CTB1F-02 | 47 | Dr. Inam Illahi |
 
+### Additional printed text
+- `BSSE · Semester 3 · Session Fall 2025-2029 · Sec A · Evening`
+- `BSSE · Semester 3 · Session Fall 2025-2029 · Sec A · Morning`
+- `BSSE · Semester 4 · Session Spring 2025-2029 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 17
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -467,7 +642,18 @@
 | 4 | 05-11-2026 | 3:00 PM–4:30 PM | BS Software Engineering | Evening | Semester 7 | A | SOEN-4141 | Software Verification and Validation | CTB1F-05 | 54 | Mr Muhammad  Imran Ali |
 | 4 | 06-11-2026 | 3:00 PM–4:30 PM | BS Software Engineering | Evening | Semester 7 | A | SOEN-4134 | Software Quality Engineering | CTB1F-05 | 54 | Miss Sana  Irshad |
 
+### Additional printed text
+- `BSSE · Semester 5 · Session Fall 2024-2028 · Sec A · Evening`
+- `BSSE · Semester 5 · Session Fall 2024-2028 · Sec A · Morning`
+- `BSSE · Semester 5 · Session Fall 2024-2028 · Sec B · Morning`
+- `BSSE · Semester 7 · Session Fall 2023-2027 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.
+
 ## PAGE 18
+
+> Emerson University Multan
+> Faculty of Computing and Emerging Technologies
+> Mid Term Examination for Semester (Fall-2026) w.e.f. 07-09-2026
 
 | Slot | Date | Time | Program Name | Shift | Semester | Section | Code | Course Title | Room No. | Students | Invigilator(s) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -494,3 +680,11 @@
 | 4 | 05-11-2026 | 3:00 PM–4:30 PM | MS Information Technology | Evening | Semester 3 | A | INTE-6125 | Advanced Topics in Computing | CLB1G-04 | 22 | Dr Shahbaz Hassan Wasti |
 | 4 | 06-11-2026 | 3:00 PM–4:30 PM | MS Information Technology | Evening | Semester 3 | A | INTE-6104 | Information System Modeling, Analysis, and Design | CLB1G-04 | 22 | Dr. Wasif Akbar |
 
+### Additional printed text
+- `BSSE · Semester 7 · Session Fall 2023-2027 · Sec A · Morning`
+- `MSCS · Semester 3 · Session Fall 2025-2027 · Sec A · Evening`
+- `MSCYBSEC · Semester 1 · Session Fall 2026-2028 · Sec A · Evening`
+- `MSCYBSEC · Semester 3 · Session Fall 2025-2027 · Sec A · Evening`
+- `MSIT · Semester 1 · Session Fall 2026-2028 · Sec A · Evening`
+- `MSIT · Semester 3 · Session Fall 2025-2027 · Sec A · Evening`
+- How to read Room No.: CLB1G-01 = CLB (Computing Lab Block) · 1 (Block 1) · G (Ground Floor) · 01 (Room 01).  CLB = Computing Lab Block · CTB = Computing Teaching Block · G = Ground Floor · F = First Floor.

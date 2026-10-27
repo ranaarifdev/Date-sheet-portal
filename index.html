@@ -4,19 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>CSET Examination Portal · Fall 2026</title>
+  <meta name="description" content="Emerson University Multan — FCET Mid-Term Examination Date Sheet Portal for Fall Semester 2026. Search, filter, print and download teacher-wise and class-wise examination schedules.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="print-header no-print">
-    <h1>Emerson University Multan</h1>
-    <p>Faculty of Computing & Emerging Technologies · Department of Computer Science & Emerging Technologies<br>Mid-Term Examination Date Sheet · Fall 2026</p>
-  </div>
   <header class="top no-print">
     <div class="brand">
       <div class="logo">EU</div>
       <div>
         <b>EMERSON UNIVERSITY MULTAN</b>
-        <small>Faculty of Computing & Emerging Technologies</small>
+        <small>Faculty of Computing &amp; Emerging Technologies</small>
       </div>
     </div>
     <button id="theme" class="icon" title="Toggle Dark Mode">☾</button>
@@ -28,7 +25,6 @@
     <button data-view="program">Program Sheets</button>
     <button data-view="class">Class Sheets</button>
     <button data-view="calendar">Calendar</button>
-    <button data-view="print">Print & Export</button>
   </nav>
   <main>
     <section class="hero no-print">
@@ -42,6 +38,8 @@
   </main>
   <footer class="no-print">Emerson University Multan · Faculty of Computing and Emerging Technologies</footer>
   <script src="data/exam_schedule.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
