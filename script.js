@@ -139,10 +139,10 @@ function getPrintMeta(rows) {
   };
 
   if (view === 'teacher' && $('#teacherSelect')?.value) {
-    return { ...base, subtitle: 'Teacher-Wise Examination Date Sheet', detail: $('#teacherSelect').value };
+    return { ...base, subheading: 'Teacher-Wise Examination Date Sheet', detail: $('#teacherSelect').value };
   }
   if (view === 'program' && $('#programSelect')?.value) {
-    return { ...base, subtitle: 'Program-Wise Examination Date Sheet', detail: $('#programSelect').value };
+    return { ...base, subheading: 'Program-Wise Examination Date Sheet', detail: $('#programSelect').value };
   }
   if (view === 'class' && $('#classP')?.value) {
     const p = $('#classP').value;
@@ -150,15 +150,15 @@ function getPrintMeta(rows) {
     const sec = $('#classSec').value;
     const shift = $('#classSh').value;
     const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift}`;
-    return { ...base, subtitle: 'Class-Wise Examination Date Sheet', detail: classDetail };
+    return { ...base, subheading: 'Class-Wise Examination Date Sheet', detail: classDetail };
   }
   if (view === 'calendar') {
-    return { ...base, subtitle: 'Examination Calendar', detail: 'Departmental examination schedule' };
+    return { ...base, subheading: 'Examination Calendar', detail: 'Departmental examination schedule' };
   }
   if (view === 'complete') {
-    return { ...base, subtitle: 'Complete Examination Date Sheet', detail: `${rows.length} records` };
+    return { ...base, subheading: 'Complete Examination Date Sheet', detail: `${rows.length} records` };
   }
-  return { ...base, subtitle: 'Complete Examination Date Sheet', detail: 'Portal overview' };
+  return { ...base, subheading: 'Complete Examination Date Sheet', detail: 'Portal overview' };
 }
 
 function buildPrintTable(rows) {
