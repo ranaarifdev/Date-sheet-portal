@@ -239,8 +239,8 @@ footer {
 }
 
 @page {
-  size: A4 portrait;
-  margin: 12mm 10mm 14mm;
+  size: A4 landscape;
+  margin: 8mm;
 }
 
 .print-sheet {
@@ -405,13 +405,16 @@ footer {
     display: block !important;
     page-break-inside: avoid;
     max-width: none;
+    min-height: calc(210mm - 16mm);
     margin: 0;
-    padding: 0;
-    background: #fff;
-    color: #000;
-    border: 0;
-    border-radius: 0;
+    padding: 9mm 8mm 7mm;
+    background: #2f2f2f !important;
+    color: #e9e9e9 !important;
+    border: 1px solid #555;
+    border-radius: 6mm;
     box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .top, nav, .hero, footer, .no-print, .toolbar, .filters, .field, button, select, input, #theme {
@@ -451,17 +454,24 @@ footer {
     font-size: 9.5pt;
   }
 
-  .print-secondary { color: #333; }
+  .print-secondary { color: #bdbdbd; }
 
   .print-table th, .print-table td {
-    border-bottom: 1px solid #bbb;
+    border-bottom: 1px solid #505050;
   }
 
   .print-table th {
-    background: #f4f4f4;
+    background: transparent;
   }
 
-  .print-footer { border-top-color: #000; }
+  .print-header { border-bottom-color: #555; }
+  .print-department,
+  .print-heading,
+  .print-subheading,
+  .print-context,
+  .print-meta { color: #e9e9e9; }
+  .print-footer { border-top-color: #555; }
+  .print-signature .line { border-bottom-color: #e9e9e9; }
 
   .print-table {
     font-size: 7.7pt;
