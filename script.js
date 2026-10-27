@@ -592,7 +592,13 @@ function calendar() {
   $('#calApply').onclick = calendar;
   $('#calTeacher').onchange = calendar;
   $('#calProgram').onchange = calendar;
-  $('#calPrint').onclick = () => window.print();
+  $('#calPrint').onclick = () => {
+    const rows = matched;
+    triggerPrint(rows, {
+      subtitle: 'Examination Calendar',
+      detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
+    });
+  };
 }
 
 function dashboard() {
