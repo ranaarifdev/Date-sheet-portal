@@ -108,6 +108,12 @@ function table(rows, isTeacherView = false) {
   </table></div>`;
 }
 
+function stripLabelPrefix(value, label) {
+  if (typeof value !== 'string' || !label) return value;
+  const prefix = `${label}: `;
+  return value.startsWith(prefix) ? value.slice(prefix.length) : value;
+}
+
 function getCurrentPrintRows() {
   if (view === 'teacher' || view === 'program' || view === 'class' || view === 'calendar') {
     return [...selected].sort(sortBySchedule);
@@ -122,19 +128,26 @@ function getPrintMeta(rows) {
   const generatedAt = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
   const base = {
     title: 'EMERSON UNIVERSITY MULTAN',
-    department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES',
-    heading: 'MID-TERM EXAMINATION DATE SHEET',
-    semesterLabel: 'FALL SEMESTER 2026',
+    department: 'Department of Computing & Emerging Technology',
+    heading: 'CSET Mid Term Examination — Fall 2026',
+    semesterLabel: 'Fall 2026',
+    session: 'Fall 2026',
     period: periodForRows(rows),
-    generatedOn: `Generated: ${generatedAt}`
+    generatedOn: `Generated: ${generatedAt}`,
+    totalPapers: rows.length,
+    sheetType: 'Complete Examination Date Sheet',
+    detailLabel: 'Selection',
+    detail: 'Complete Examination Date Sheet'
   };
 
   if (view === 'teacher' && $('#teacherSelect')?.value) {
     const teacherName = $('#teacherSelect').value;
     return {
       ...base,
-      subtitle: 'Teacher-Wise Examination Date Sheet',
-      detail: `Teacher / Invigilator: ${teacherName}`
+      sheetType: 'Teacher-Wise Date Sheet',
+      detailLabel: 'Teacher / Invigilator',
+      detail: teacherName,
+      subtitle: 'Teacher-Wise Examination Date Sheet'
     };
   }
   if (view === 'program' && $('#programSelect')?.value) {
@@ -146,7 +159,13 @@ function getPrintMeta(rows) {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
-    return { ...base, subtitle: 'Program-Wise Examination Date Sheet', detail };
+    return {
+      ...base,
+      sheetType: 'Program-Wise Date Sheet',
+      detailLabel: 'Program Details',
+      detail,
+      subtitle: 'Program-Wise Examination Date Sheet'
+    };
   }
   if (view === 'class' && $('#classP')?.value) {
     const p = $('#classP').value;
@@ -154,15 +173,72 @@ function getPrintMeta(rows) {
     const sec = $('#classSec').value;
     const shift = $('#classSh').value;
     const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift} Shift`;
-    return { ...base, subtitle: 'Class-Wise Examination Date Sheet', detail: classDetail };
+    return {
+      ...base,
+      sheetType: 'Class-Wise Date Sheet',
+      detailLabel: 'Class Details',
+      detail: classDetail,
+      subtitle: 'Class-Wise Examination Date Sheet'
+    };
   }
   if (view === 'calendar') {
-    return { ...base, subtitle: 'Examination Calendar', detail: 'Departmental Examination Schedule' };
+    return {
+      ...base,
+      sheetType: 'Examination Calendar',
+      detailLabel: 'Calendar Scope',
+      detail: 'Departmental Examination Schedule',
+      subtitle: 'Examination Calendar'
+    };
   }
-  if (view === 'complete') {
-    return { ...base, subtitle: 'Complete Examination Date Sheet', detail: `Total records: ${rows.length}` };
-  }
-  return { ...base, subtitle: 'Complete Examination Date Sheet', detail: '' };
+  return {
+    ...base,
+    subtitle: 'Complete Examination Date Sheet',
+    detail: 'Complete Examination Date Sheet'
+  };
+}
+
+function buildPrintHeader(meta) {
+  const rawDetail = meta.detail || meta.subtitle || 'Complete Examination Date Sheet';
+  const cleanDetail = stripLabelPrefix(rawDetail, meta.detailLabel || '');
+  const cleanGeneratedOn = stripLabelPrefix(meta.generatedOn || 'Generated: —', 'Generated');
+
+  const details = [
+    ['Examination Session', meta.session || 'Fall 2026'],
+    ['Date Sheet Type', meta.sheetType || meta.subtitle || 'Examination Date Sheet'],
+    [meta.detailLabel || 'Relevant Details', cleanDetail],
+    ['Total Papers', String(meta.totalPapers ?? 0)],
+    ['Generation Date', cleanGeneratedOn]
+  ];
+
+  const detailHtml = details.map(([label, value]) => `
+    <div class="print-detail-item">
+      <span>${esc(label)}</span>
+      <strong>${esc(value)}</strong>
+    </div>
+  `).join('');
+
+  const contextTitle = meta.subtitle || 'Examination Date Sheet';
+  const contextDetail = cleanDetail && meta.detailLabel ? `${meta.detailLabel}: ${cleanDetail}` : cleanDetail || contextTitle;
+
+  return `<div class="print-header">
+    <div class="print-title">${esc(meta.title)}</div>
+    <div class="print-department">${esc(meta.department)}</div>
+    <div class="print-heading">${esc(meta.heading)}</div>
+    <div class="print-subheading">${esc(meta.semesterLabel || 'Fall 2026')}</div>
+    <div class="print-context-line">${esc(contextDetail)}</div>
+    <div class="print-divider"></div>
+    <div class="print-details">
+      <div class="print-details-title">Date Sheet Details</div>
+      <div class="print-detail-grid">${detailHtml}</div>
+    </div>
+    <div class="print-sheet-heading">${esc(contextTitle)}</div>
+    <div class="print-sheet-context">${esc(cleanDetail || contextTitle)}</div>
+    <div class="print-meta">
+      <span>${esc(meta.period)}</span>
+      <span>${esc(meta.generatedOn || 'Generated: —')}</span>
+    </div>
+    <div class="print-divider"></div>
+  </div>`;
 }
 
 /* Build the print-ready HTML table */
@@ -261,23 +337,6 @@ function buildSignatureFooter() {
   </div>`;
 }
 
-/* Build the full print header HTML from a meta object */
-function buildPrintHeader(meta) {
-  return `<div class="print-header">
-    <div class="print-title">${esc(meta.title)}</div>
-    <div class="print-department">${esc(meta.department)}</div>
-    <div class="print-heading">${esc(meta.heading)}</div>
-    <div class="print-subheading">${esc(meta.semesterLabel)}</div>
-    <div class="print-subheading">${esc(meta.subtitle || 'Complete Examination Date Sheet')}</div>
-    ${meta.detail ? `<div class="print-context">${esc(meta.detail)}</div>` : ''}
-    <div class="print-meta">
-      <span>${esc(meta.period)}</span>
-      <span>${esc(meta.generatedOn)}</span>
-    </div>
-    <div class="print-divider"></div>
-  </div>`;
-}
-
 /* Assemble or refresh the hidden #printDocument element */
 function buildPrintDocument(rows, meta) {
   // Remove any stale print document first
@@ -300,16 +359,9 @@ function triggerPrint(rows, metaOverride) {
     return;
   }
 
-  const baseMeta = {
-    title: 'EMERSON UNIVERSITY MULTAN',
-    department: 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES',
-    heading: 'MID-TERM EXAMINATION DATE SHEET',
-    semesterLabel: 'FALL SEMESTER 2026',
-    period: periodForRows(rowsToPrint),
-    generatedOn: `Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`
-  };
-
-  const meta = metaOverride ? { ...baseMeta, ...metaOverride } : getPrintMeta(rowsToPrint);
+  const meta = { ...getPrintMeta(rowsToPrint), ...metaOverride };
+  meta.detail = stripLabelPrefix(meta.detail || '', meta.detailLabel || '');
+  meta.generatedOn = stripLabelPrefix(meta.generatedOn || '', 'Generated');
 
   buildPrintDocument(rowsToPrint, meta);
   document.body.classList.add('print-mode');
@@ -331,7 +383,18 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     alert('No records to export. Please make a selection first.');
     return;
   }
-  if (!window.jspdf?.jsPDF || typeof window.jspdf.jsPDF.prototype.autoTable !== 'function') {
+
+  const resolvedMeta = { ...getPrintMeta(rows), ...meta, totalPapers: rows.length };
+  resolvedMeta.detail = stripLabelPrefix(resolvedMeta.detail || '', resolvedMeta.detailLabel || '');
+  resolvedMeta.generatedOn = stripLabelPrefix(resolvedMeta.generatedOn || '', 'Generated');
+
+  const JspdfCtor = window.jspdf?.jsPDF;
+  const hasPdfTablePlugin = !!(JspdfCtor && (
+    typeof JspdfCtor.prototype?.autoTable === 'function' ||
+    typeof JspdfCtor.API?.autoTable === 'function'
+  ));
+
+  if (!JspdfCtor || !hasPdfTablePlugin) {
     alert('PDF library is still loading. Please wait a moment and try again.');
     return;
   }
@@ -349,13 +412,13 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   const doc = new window.jspdf.jsPDF({ orientation, unit: 'mm', format: 'a4' });
   const cx = pageW / 2;
 
-  const title   = meta.title   || 'EMERSON UNIVERSITY MULTAN';
-  const dept    = meta.department || 'FACULTY OF COMPUTING AND EMERGING TECHNOLOGIES';
-  const heading = meta.heading  || 'MID-TERM EXAMINATION DATE SHEET';
-  const semLbl  = meta.semesterLabel || 'FALL SEMESTER 2026';
-  const subtitle = meta.subtitle || 'Examination Date Sheet';
-  const detail  = meta.detail   || '';
-  const period  = meta.period   || periodForRows(rows);
+  const title   = resolvedMeta.title   || 'EMERSON UNIVERSITY MULTAN';
+  const dept    = resolvedMeta.department || 'Department of Computing & Emerging Technology';
+  const heading = resolvedMeta.heading  || 'CSET Mid Term Examination — Fall 2026';
+  const semLbl  = resolvedMeta.semesterLabel || resolvedMeta.session || 'Fall 2026';
+  const subtitle = resolvedMeta.subtitle || resolvedMeta.sheetType || 'Examination Date Sheet';
+  const detail  = resolvedMeta.detail   || '';
+  const period  = resolvedMeta.period   || periodForRows(rows);
   const genDate = `Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`;
 
   let y = 14;
@@ -363,6 +426,11 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   // Title block
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
+
+  const sessionLabel = resolvedMeta.session || semLbl || 'Fall 2026';
+  const detailLabel = resolvedMeta.detailLabel || 'Relevant Details';
+  const scopeValue = resolvedMeta.detail || detail || subtitle || 'Complete Examination Date Sheet';
+  const totalLabel = String(rows.length);
 
   doc.setFontSize(15);
   doc.text(title, cx, y, { align: 'center' }); y += 6.5;
@@ -374,11 +442,35 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   doc.text(heading, cx, y, { align: 'center' }); y += 5.5;
 
   doc.setFontSize(10);
-  doc.text(semLbl, cx, y, { align: 'center' }); y += 5;
+  doc.text(sessionLabel, cx, y, { align: 'center' }); y += 5;
 
   doc.setDrawColor(0);
   doc.setLineWidth(0.5);
   doc.line(margin, y, pageW - margin, y); y += 5;
+
+  doc.setFillColor(245, 248, 251);
+  doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'F');
+  doc.setDrawColor(180);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'S');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.text('Date Sheet Details', margin + 5, y + 6.5);
+
+  const detailItems = [
+    `Type: ${resolvedMeta.sheetType || subtitle || 'Examination Date Sheet'}`,
+    `${detailLabel}: ${stripLabelPrefix(scopeValue || '', detailLabel || '')}`,
+    `Papers: ${totalLabel}`,
+    `Generated: ${stripLabelPrefix(genDate || '', 'Generated')}`
+  ];
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.4);
+  detailItems.forEach((item, idx) => {
+    const x = margin + 5 + (idx % 2) * (usableW / 2.1);
+    const yy = y + 11 + (idx >= 2 ? 5 : 0);
+    doc.text(item, x, yy);
+  });
+  y += 24;
 
   doc.setFontSize(10.5);
   doc.text(subtitle, cx, y, { align: 'center' }); y += 5.5;
@@ -446,12 +538,15 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     ]);
   }
 
+  const pageFooterLeft = 'Emerson University Multan — FCET';
+
   doc.autoTable({
     startY: y,
     margin: { left: margin, right: margin },
     head,
     body,
     theme: 'grid',
+    showHead: 'everyPage',
     styles: {
       fontSize: isClass ? 8.5 : 7.2,
       cellPadding: 2,
@@ -462,19 +557,52 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       fillColor: [220, 232, 240],
       textColor: [0, 0, 0],
       fontStyle: 'bold',
-      fontSize: isClass ? 8 : 6.8,
+      fontSize: isClass ? 8 : 6.8
     },
     rowPageBreak: 'avoid',
     didDrawPage: (hookData) => {
-      // Repeat page number at bottom of each page
-      const pgCount = doc.internal.getNumberOfPages();
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(0);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(15);
+      doc.text(title, cx, 14, { align: 'center' });
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(dept, cx, 20, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11.5);
+      doc.text(heading, cx, 26, { align: 'center' });
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${detailLabel}: ${scopeValue}`, cx, 32, { align: 'center' });
+      doc.setDrawColor(180);
+      doc.setLineWidth(0.4);
+      doc.line(margin, 35, pageW - margin, 35);
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(100);
-      doc.text(`Page ${hookData.pageNumber} of ${pgCount}`, pageW - margin, pageH - 6, { align: 'right' });
-      doc.text('Emerson University Multan — FCET', margin, pageH - 6);
+      doc.text(pageFooterLeft, margin, pageH - 6);
+      doc.text(`Page ${hookData.pageNumber} of ?`, pageW - margin, pageH - 6, { align: 'right' });
     }
   });
+
+  // Second pass: replace placeholder with real total page count
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100);
+    // Overwrite the footer area with correct text (white box first to clear placeholder)
+    doc.setFillColor(255, 255, 255);
+    doc.rect(pageW - margin - 35, pageH - 9, 35, 5, 'F');
+    doc.text(
+      `Page ${pg} of ${totalPages}`,
+      pageW - margin, pageH - 6, { align: 'right' }
+    );
+  }
 
   // Signature footer — place after table on last page
   const finalY = doc.lastAutoTable?.finalY || y + 40;
