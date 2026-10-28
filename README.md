@@ -8,9 +8,8 @@ The project uses the verified schedule data extracted from the official universi
 
 ## Source Data Files
 
-The official source material and extracted records are stored in the project root and data folder:
+The official source PDF used for verification is identified in `data/verification_report.json`. The extracted source material and schedule records are stored in the project root and data folder:
 
-- `CSET_Mid_Term_Examination_Fall_2026.pdf` (source document)
 - `CSET_Mid_Term_Examination_Fall_2026.txt`
 - `CSET_Mid_Term_Examination_Fall_2026.md`
 - `data/exam_schedule.js`
