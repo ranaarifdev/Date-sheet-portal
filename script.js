@@ -128,7 +128,7 @@ function getPrintMeta(rows) {
   const generatedAt = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
   const base = {
     title: 'EMERSON UNIVERSITY MULTAN',
-    department: 'Department of Computing & Emerging Technology',
+    department: 'Faculty of Computing & Emerging Technologies',
     heading: 'CSET Mid Term Examination — Fall 2026',
     semesterLabel: 'Fall 2026',
     session: 'Fall 2026',
@@ -201,13 +201,15 @@ function buildPrintHeader(meta) {
   const rawDetail = meta.detail || meta.subtitle || 'Complete Examination Date Sheet';
   const cleanDetail = stripLabelPrefix(rawDetail, meta.detailLabel || '');
   const cleanGeneratedOn = stripLabelPrefix(meta.generatedOn || 'Generated: —', 'Generated');
+  const cleanPeriod = (meta.period || '').replace(/^Examination period:\s*/i, '');
 
   const details = [
-    ['Examination Session', meta.session || 'Fall 2026'],
     ['Date Sheet Type', meta.sheetType || meta.subtitle || 'Examination Date Sheet'],
-    [meta.detailLabel || 'Relevant Details', cleanDetail],
+    [meta.detailLabel || 'Selection', cleanDetail],
+    ['Examination Period', cleanPeriod],
     ['Total Papers', String(meta.totalPapers ?? 0)],
-    ['Generation Date', cleanGeneratedOn]
+    ['Session', meta.session || 'Fall 2026'],
+    ['Date Generated', cleanGeneratedOn]
   ];
 
   const detailHtml = details.map(([label, value]) => `
@@ -217,25 +219,18 @@ function buildPrintHeader(meta) {
     </div>
   `).join('');
 
-  const contextTitle = meta.subtitle || 'Examination Date Sheet';
-  const contextDetail = cleanDetail && meta.detailLabel ? `${meta.detailLabel}: ${cleanDetail}` : cleanDetail || contextTitle;
-
   return `<div class="print-header">
-    <div class="print-title">${esc(meta.title)}</div>
-    <div class="print-department">${esc(meta.department)}</div>
-    <div class="print-heading">${esc(meta.heading)}</div>
-    <div class="print-subheading">${esc(meta.semesterLabel || 'Fall 2026')}</div>
-    <div class="print-context-line">${esc(contextDetail)}</div>
+    <div class="print-brand-row">
+      <img class="print-logo" src="university logo .png" alt="University Logo" />
+      <div class="print-titles">
+        <div class="print-title">${esc(meta.title)}</div>
+        <div class="print-department">${esc(meta.department)}</div>
+        <div class="print-heading">${esc(meta.heading)}</div>
+      </div>
+    </div>
     <div class="print-divider"></div>
     <div class="print-details">
-      <div class="print-details-title">Date Sheet Details</div>
       <div class="print-detail-grid">${detailHtml}</div>
-    </div>
-    <div class="print-sheet-heading">${esc(contextTitle)}</div>
-    <div class="print-sheet-context">${esc(cleanDetail || contextTitle)}</div>
-    <div class="print-meta">
-      <span>${esc(meta.period)}</span>
-      <span>${esc(meta.generatedOn || 'Generated: —')}</span>
     </div>
     <div class="print-divider"></div>
   </div>`;
@@ -604,9 +599,14 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     );
   }
 
-  // Signature footer — place after table on last page
-  const finalY = doc.lastAutoTable?.finalY || y + 40;
-  const footerY = Math.min(finalY + 12, pageH - 40);
+  // Keep signatures below the table and never overlap the last table row.
+  const finalY = doc.lastAutoTable?.finalY || y;
+  const signatureHeight = 36;
+  let footerY = finalY + 12;
+  if (footerY + signatureHeight > pageH - 8) {
+    doc.addPage();
+    footerY = 18;
+  }
 
   doc.setDrawColor(0);
   doc.setLineWidth(0.5);
@@ -1015,6 +1015,7 @@ function calendar() {
       ${selector('Program', 'calProgram', uniq('program'))}
       <button class="primary" id="calApply">Filter calendar</button>
       <button class="secondary" id="calPrint">Print calendar</button>
+      <button class="secondary" id="calPdf">Download PDF</button>
     </div>
     <div id="calContent" style="margin-top:14px">
       ${datesSorted.length ? datesSorted.map(d => {
@@ -1045,6 +1046,10 @@ function calendar() {
       detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
     });
   };
+  $('#calPdf').onclick = () => downloadPdf(matched, {
+    subtitle: 'Examination Calendar',
+    detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
+  }, pdfFilename('Examination_Calendar', [tFilter, pFilter]));
 }
 
 /* ============================================================
