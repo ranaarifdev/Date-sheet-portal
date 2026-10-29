@@ -1,6 +1,13 @@
 {
   "totalRecords": 412,
   "pages": 18,
+  "rejectedSources": {
+    "Teacher_Anam_Ashraf_Fall_2026.pdf": {
+      "status": "rejected",
+      "reason": "Extraction produced only numeric filler (1 1 1 ...); no schedule records recoverable.",
+      "records_contributed": 0
+    }
+  },
   "programs": {
     "BS Artificial Intelligence": 54,
     "BS Computer Science": 60,

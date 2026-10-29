@@ -4,6 +4,22 @@ let data = [];
 let view = 'dashboard';
 let selected = [];
 
+// Keep malformed extraction artifacts out of every view, export, and print path.
+const NUMERIC_FILLER = /^\s*1[\s1]*$/;
+const REQUIRED_RECORD_FIELDS = ['date', 'courseCode', 'courseTitle', 'room'];
+
+function isValidExamRecord(record) {
+  return record && REQUIRED_RECORD_FIELDS.every(field => {
+    const value = record[field];
+    return value !== null && value !== undefined && String(value).trim() !== '' &&
+      !NUMERIC_FILLER.test(String(value));
+  });
+}
+
+function validatedRecords(records) {
+  return Array.isArray(records) ? records.filter(isValidExamRecord) : [];
+}
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function formatDate(value) {
@@ -1099,7 +1115,7 @@ $('#theme').onclick = () => {
    ============================================================ */
 function initApp() {
   if (window.EXAM_DATA && Array.isArray(window.EXAM_DATA) && window.EXAM_DATA.length > 0) {
-    data = window.EXAM_DATA;
+    data = validatedRecords(window.EXAM_DATA);
     dashboard();
   } else {
     fetch('data/exam_schedule.json')
@@ -1108,7 +1124,7 @@ function initApp() {
         return r.json();
       })
       .then(x => {
-        data = x;
+        data = validatedRecords(x);
         dashboard();
       })
       .catch(() => {

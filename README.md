@@ -34,7 +34,7 @@ The portal works as a static site and does not require a backend or build step.
 
 ## Key Features
 
-- Dashboard with overall statistics across the 412 verified examination records across all 18 pages.
+- Dashboard with overall statistics across the 412 verified examination records across all 18 pages. The displayed total is derived from the loaded, validated dataset.
 - Complete date sheet with live filtering by date, day, program, semester, section, shift, teacher/invigilator, course code, and room.
 - Teacher date sheets with focused invigilator views.
 - Program-wise schedules with optional semester, section, and shift filtering.
@@ -65,6 +65,8 @@ The generated document includes:
 ## Data Integrity and Verification
 
 The data set is based on the extracted schedule records and has been checked against the source document structure. The project keeps the original extracted records and the verification notes in `data/verification_report.json`.
+
+At runtime, records with an empty required value (`date`, `courseCode`, `courseTitle`, or `room`) or numeric extraction filler matching `/^\\s*1[\\s1]*$/` are rejected before they reach any view, print layout, or PDF export. The corrupted `Teacher_Anam_Ashraf_Fall_2026.pdf` extraction is documented as rejected in the verification report; its four valid schedule records from the main schedule remain preserved.
 
 ## Notes
 
