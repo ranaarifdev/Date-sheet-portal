@@ -176,6 +176,16 @@
     },
     "jsonRecordsCompared": 413,
     "fieldComparison": "All populated source rows parsed and normalized across date, day, time, slot, program, semester, section, shift, room, students, course code, course title, and invigilator fields.",
+    "classWiseSpotChecks": [
+      {
+        "recordId": "exam-205",
+        "sourcePage": 12,
+        "field": "time",
+        "sourceValue": "3:30 PM-5:00 PM",
+        "datasetValue": "3:30 PM-5:00 PM",
+        "status": "matched"
+      }
+    ],
     "parseErrors": []
   },
   "rejectedSources": {
@@ -195,7 +205,10 @@
     "jsonParse": "passed",
     "browserInteraction": "passed (local browser rendered 413 records across 11 programs)",
     "browserPrinting": "passed (print media rendered the institutional header and all 413 schedule rows)",
-    "pdfExport": "passed (Complete Date Sheet download saved a 1,264,897-byte, 25-page PDF; its institutional header and schedule content were verified)"
+    "pdfExport": "passed (Complete Date Sheet download saved a 1,264,897-byte, 25-page PDF; its institutional header and schedule content were verified)",
+    "classWisePrint": "passed (Cyber Security Semester 7, Section A, Evening rendered all five records with logo, institution/department header, class context, and two styled signature blocks)",
+    "classWisePdf": "passed (single-page export embeds the university logo, has one institutional header, explicit class context, a single correct page counter, styled signature blocks, and complete course data)",
+    "classWiseTitleSanitization": "passed (three-pass decoding handles nested ampersand, angle-bracket, quote, and apostrophe entities)"
   },
   "sourceNotes": [
     "The uploaded source PDF is byte-for-byte identical to the previously verified 24-page source; all 413 schedule records already matched their assigned source pages, so no schedule values required changes.",

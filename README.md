@@ -41,8 +41,8 @@ The portal works as a static site and does not require a backend or build step.
 - Program-wise schedules with optional semester, section, and shift filtering.
 - Class-wise schedules for specific program, semester, section, and shift combinations.
 - Calendar-based view for chronological exam scheduling.
-- Print layout using white A4 output with black text and institutional header styling.
-- PDF export for filtered complete, teacher-wise, program-wise, and class-wise schedules.
+- Class-wise print sheets use a white A4 layout, university logo, institutional header, explicit program/semester/section/shift context, and bordered signature blocks.
+- PDF export for filtered complete, teacher-wise, program-wise, and class-wise schedules; class-wise PDFs include the university logo and institutional header.
 - University branding with the Emerson University Multan logo and official institutional title block.
 - Light/dark mode toggle.
 
@@ -58,10 +58,11 @@ The generated document includes:
 - Emerson University Multan
 - Department of Computing & Emerging Technology
 - CSET Mid Term Examination — Fall 2026
-- view-specific context such as teacher name, class, program, or complete schedule
+- view-specific context such as teacher name, class, program, or complete schedule; class sheets prominently identify the program, semester, section, and shift
 - date-sheet details block with session, type, selection, paper count, and generation date
 - repeated column headers on multi-page output where possible
-- HOD / Head of Department and Examination Coordinator signature lines
+- styled HOD / Head of Department and Examination Coordinator signature blocks
+- a single, clear institutional header and correct page numbering in downloaded PDFs
 
 ## Data Integrity and Verification
 

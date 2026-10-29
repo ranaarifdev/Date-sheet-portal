@@ -17,7 +17,12 @@ function isValidExamRecord(record) {
 }
 
 function validatedRecords(records) {
-  return Array.isArray(records) ? records.filter(isValidExamRecord) : [];
+  return Array.isArray(records)
+    ? records.filter(isValidExamRecord).map(record => ({
+      ...record,
+      courseTitle: decodeHtml(record.courseTitle)
+    }))
+    : [];
 }
 
 function decodeHtml(str) {
@@ -209,6 +214,7 @@ function getPrintMeta(rows) {
       sheetType: 'Class-Wise Date Sheet',
       detailLabel: 'Class Details',
       detail: classDetail,
+      classContext: { program: p, semester: s, section: sec, shift },
       subtitle: 'Class-Wise Examination Date Sheet'
     };
   }
@@ -233,6 +239,7 @@ function buildPrintHeader(meta) {
   const cleanDetail = stripLabelPrefix(rawDetail, meta.detailLabel || '');
   const cleanGeneratedOn = stripLabelPrefix(meta.generatedOn || 'Generated: —', 'Generated');
   const cleanPeriod = (meta.period || '').replace(/^Examination period:\s*/i, '');
+  const classContext = meta.classContext;
 
   const details = [
     ['Date Sheet Type', meta.sheetType || meta.subtitle || 'Examination Date Sheet'],
@@ -241,7 +248,7 @@ function buildPrintHeader(meta) {
     ['Total Papers', String(meta.totalPapers ?? 0)],
     ['Session', meta.session || 'Fall 2026'],
     ['Date Generated', cleanGeneratedOn]
-  ];
+  ].filter(([label]) => !(classContext && label === meta.detailLabel));
 
   const detailHtml = details.map(([label, value]) => `
     <div class="print-detail-item">
@@ -259,6 +266,7 @@ function buildPrintHeader(meta) {
         <div class="print-heading">${esc(meta.heading)}</div>
       </div>
     </div>
+    ${classContext ? `<div class="print-context-line"><span>Class:</span> ${esc(classContext.program)} · Semester ${esc(classContext.semester)} · Section ${esc(classContext.section)} · ${esc(classContext.shift)} Shift</div>` : ''}
     <div class="print-divider"></div>
     <div class="print-details">
       <div class="print-detail-grid">${detailHtml}</div>
@@ -371,7 +379,7 @@ function buildPrintDocument(rows, meta) {
 
   const printDoc = document.createElement('div');
   printDoc.id = 'printDocument';
-  printDoc.className = 'print-sheet';
+  printDoc.className = `print-sheet${view === 'class' ? ' class-print-sheet' : ''}`;
   printDoc.innerHTML = buildPrintHeader(meta) + buildPrintTable(rows) + buildSignatureFooter();
   document.body.appendChild(printDoc);
   return printDoc;
@@ -427,6 +435,12 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
 
   const isTeacher = view === 'teacher';
   const isClass = view === 'class';
+  const logoImage = document.querySelector('.logo');
+
+  if (isClass && (!logoImage?.complete || !logoImage.naturalWidth)) {
+    alert('The university logo is not available yet. Please wait for it to load, then try the PDF download again.');
+    return;
+  }
 
   // Use landscape for most, portrait for class (fewer columns)
   const orientation = isClass ? 'portrait' : 'landscape';
@@ -446,33 +460,46 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   const detail  = resolvedMeta.detail   || '';
   const period  = resolvedMeta.period   || periodForRows(rows);
   const genDate = `Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`;
-
-  let y = 14;
-
-  // Title block
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 0, 0);
-
   const sessionLabel = resolvedMeta.session || semLbl || 'Fall 2026';
   const detailLabel = resolvedMeta.detailLabel || 'Relevant Details';
   const scopeValue = resolvedMeta.detail || detail || subtitle || 'Complete Examination Date Sheet';
   const totalLabel = String(rows.length);
+  const classContext = resolvedMeta.classContext;
 
-  doc.setFontSize(15);
-  doc.text(title, cx, y, { align: 'center' }); y += 6.5;
+  const drawPageHeader = () => {
+    doc.setTextColor(0, 0, 0);
+    if (classContext) {
+      doc.addImage(logoImage, 'PNG', margin, 8, 20, 20);
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text(title, cx, 14, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.text(dept, cx, 20, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11.5);
+    doc.text(heading.replace('—', '-'), cx, 26, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(sessionLabel, cx, 32, { align: 'center' });
 
-  doc.setFontSize(9.5);
-  doc.text(dept, cx, y, { align: 'center' }); y += 5.5;
+    let ruleY = 36;
+    if (classContext) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      const contextLine = `Class: ${classContext.program} | Semester: ${classContext.semester} | Section: ${classContext.section} | Shift: ${classContext.shift}`;
+      const contextLines = doc.splitTextToSize(contextLine, usableW);
+      doc.text(contextLines, cx, 38, { align: 'center' });
+      ruleY = 38 + (contextLines.length * 4);
+    }
 
-  doc.setFontSize(11.5);
-  doc.text(heading, cx, y, { align: 'center' }); y += 5.5;
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.4);
+    doc.line(margin, ruleY, pageW - margin, ruleY);
+  };
 
-  doc.setFontSize(10);
-  doc.text(sessionLabel, cx, y, { align: 'center' }); y += 5;
-
-  doc.setDrawColor(0);
-  doc.setLineWidth(0.5);
-  doc.line(margin, y, pageW - margin, y); y += 5;
+  let y = classContext ? 48 : 42;
 
   doc.setFillColor(245, 248, 251);
   doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'F');
@@ -485,7 +512,7 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
 
   const detailItems = [
     `Type: ${resolvedMeta.sheetType || subtitle || 'Examination Date Sheet'}`,
-    `${detailLabel}: ${stripLabelPrefix(scopeValue || '', detailLabel || '')}`,
+    ...(classContext ? [] : [`${detailLabel}: ${stripLabelPrefix(scopeValue || '', detailLabel || '')}`]),
     `Papers: ${totalLabel}`,
     `Generated: ${stripLabelPrefix(genDate || '', 'Generated')}`
   ];
@@ -498,19 +525,21 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   });
   y += 24;
 
-  doc.setFontSize(10.5);
-  doc.text(subtitle, cx, y, { align: 'center' }); y += 5.5;
+  if (!classContext) {
+    doc.setFontSize(10.5);
+    doc.text(subtitle, cx, y, { align: 'center' }); y += 5.5;
 
-  if (detail) {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.5);
-    doc.text(detail, cx, y, { align: 'center' }); y += 5;
+    if (detail) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.text(detail, cx, y, { align: 'center' }); y += 5;
+    }
   }
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(60, 60, 60);
-  doc.text(period, margin, y);
+  doc.text(period.replace(/[–—]/g, '-'), margin, y);
   doc.text(genDate, pageW - margin, y, { align: 'right' }); y += 5;
 
   doc.setDrawColor(180);
@@ -526,7 +555,7 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       i + 1,
       formatDate(r.date),
       r.day || '',
-      `${r.startTime} – ${r.endTime}`,
+      `${r.startTime} - ${r.endTime}`,
       r.courseCode || 'N/A',
       decodeHtml(r.courseTitle || 'N/A'),
       r.room || 'N/A'
@@ -564,11 +593,11 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     ]);
   }
 
-  const pageFooterLeft = 'Emerson University Multan — FCET';
+  const pageFooterLeft = 'Emerson University Multan - FCET';
 
   doc.autoTable({
     startY: y,
-    margin: { left: margin, right: margin },
+    margin: { top: classContext ? 48 : 42, right: margin, bottom: 14, left: margin },
     head,
     body,
     theme: 'grid',
@@ -586,86 +615,62 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       fontSize: isClass ? 8 : 6.8
     },
     rowPageBreak: 'avoid',
-    didDrawPage: (hookData) => {
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(0);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(15);
-      doc.text(title, cx, 14, { align: 'center' });
-      doc.setFontSize(9.5);
-      doc.setFont('helvetica', 'normal');
-      doc.text(dept, cx, 20, { align: 'center' });
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11.5);
-      doc.text(heading, cx, 26, { align: 'center' });
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${detailLabel}: ${scopeValue}`, cx, 32, { align: 'center' });
-      doc.setDrawColor(180);
-      doc.setLineWidth(0.4);
-      doc.line(margin, 35, pageW - margin, 35);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
-      doc.setTextColor(100);
-      doc.text(pageFooterLeft, margin, pageH - 6);
-      doc.text(`Page ${hookData.pageNumber} of ?`, pageW - margin, pageH - 6, { align: 'right' });
+    didDrawPage: () => {
+      drawPageHeader();
     }
   });
 
-  // Second pass: replace placeholder with real total page count
+  // Keep signatures below the table and never overlap the last table row.
+  const finalY = doc.lastAutoTable?.finalY || y;
+  const signatureHeight = 42;
+  const bottomSignatureY = pageH - 14 - signatureHeight;
+  let footerY = Math.max(finalY + 10, bottomSignatureY);
+  if (footerY > bottomSignatureY) {
+    doc.addPage();
+    drawPageHeader();
+    footerY = bottomSignatureY;
+  }
+
+  const signatureGap = 8;
+  const signatureWidth = (usableW - signatureGap) / 2;
+  const signatureLabels = ['HOD / Head of Department', 'Examination Coordinator'];
+  doc.setFontSize(8);
+  doc.setLineWidth(0.25);
+  signatureLabels.forEach((label, index) => {
+    const x = margin + index * (signatureWidth + signatureGap);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(150, 165, 180);
+    doc.roundedRect(x, footerY, signatureWidth, signatureHeight, 2, 2, 'FD');
+    doc.setFillColor(15, 76, 129);
+    doc.roundedRect(x, footerY, signatureWidth, 9, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text(label, x + signatureWidth / 2, footerY + 6, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+  });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  const sigLabels = ['Signature:', 'Name:', 'Date:'];
+  sigLabels.forEach((label, idx) => {
+    const rowY = footerY + 18 + idx * 8;
+    for (let index = 0; index < signatureLabels.length; index++) {
+      const x = margin + index * (signatureWidth + signatureGap);
+      doc.text(label, x + 5, rowY);
+      doc.setDrawColor(80, 95, 110);
+      doc.line(x + 27, rowY + 0.5, x + signatureWidth - 5, rowY + 0.5);
+    }
+  });
+
   const totalPages = doc.internal.getNumberOfPages();
   for (let pg = 1; pg <= totalPages; pg++) {
     doc.setPage(pg);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(100);
-    // Overwrite the footer area with correct text (white box first to clear placeholder)
-    doc.setFillColor(255, 255, 255);
-    doc.rect(pageW - margin - 35, pageH - 9, 35, 5, 'F');
-    doc.text(
-      `Page ${pg} of ${totalPages}`,
-      pageW - margin, pageH - 6, { align: 'right' }
-    );
+    doc.text(pageFooterLeft, margin, pageH - 6);
+    doc.text(`Page ${pg} of ${totalPages}`, pageW - margin, pageH - 6, { align: 'right' });
   }
-
-  // Keep signatures below the table and never overlap the last table row.
-  const finalY = doc.lastAutoTable?.finalY || y;
-  const signatureHeight = 36;
-  let footerY = finalY + 12;
-  if (footerY + signatureHeight > pageH - 8) {
-    doc.addPage();
-    footerY = 18;
-  }
-
-  doc.setDrawColor(0);
-  doc.setLineWidth(0.5);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.setTextColor(0);
-
-  // HOD signature block (left)
-  const col1x = margin;
-  const col2x = pageW / 2 + 10;
-  const lineLen = usableW / 2 - 30;
-
-  doc.line(col1x, footerY, col1x + lineLen, footerY);
-  doc.line(col2x, footerY, col2x + lineLen, footerY);
-
-  doc.text('HOD / Head of Department', col1x + lineLen / 2, footerY + 5, { align: 'center' });
-  doc.text('Examination Coordinator', col2x + lineLen / 2, footerY + 5, { align: 'center' });
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  const sigLabels = ['Signature:', 'Name:', 'Date:'];
-  sigLabels.forEach((label, idx) => {
-    const rowY = footerY + 13 + idx * 8;
-    doc.text(`${label}`, col1x, rowY);
-    doc.line(col1x + 18, rowY + 0.5, col1x + lineLen, rowY + 0.5);
-    doc.text(`${label}`, col2x, rowY);
-    doc.line(col2x + 18, rowY + 0.5, col2x + lineLen, rowY + 0.5);
-  });
 
   doc.save(filename);
 }

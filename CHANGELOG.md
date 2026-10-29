@@ -2,8 +2,10 @@
 
 ## 2026-10-29 — Class-wise output hardening
 
-- Added three-pass HTML entity decoding before escaping titles for screen, print, and PDF output.
-- Confirmed the authoritative PDF's Cyber Security Semester 7 Evening `FLNG-41XX` time remains 3:30 PM–5:00 PM; no unsupported data change was made.
+- Added three-pass HTML entity decoding to loaded titles and before escaping screen, print, and PDF output.
+- Restored the logo and institutional headers in class-wise print/PDF layouts; emphasized program, semester, section, and shift in every class sheet.
+- Removed duplicate PDF headers and page counters, and replaced plain signature lines with styled, bordered signature blocks.
+- Confirmed the authoritative PDF and class-sheet reference both list Cyber Security Semester 7 Evening `FLNG-41XX` at 3:30 PM–5:00 PM; the displayed time separator is now PDF-safe, and no unsupported schedule change was made.
 
 ## 2026-10-29 — Confirm uploaded source PDF
 
