@@ -1,8 +1,10 @@
 {
   "totalRecords": 413,
   "pages": 24,
-  "sourcePdf": "Final CSET Mid Term Examination Fall 2026.pdf",
+  "sourcePdf": "Final updated CSET Mid Term Examination Fall 2026.pdf",
   "sourcePdfModified": "2026-10-29 09:42",
+  "sourcePdfSizeBytes": 678343,
+  "sourcePdfSha256": "72c04b32bb495977ccc1359c8a7821d038db3cf37bd254ba72e5eb6ee3de0d70",
   "programs": {
     "BS Artificial Intelligence": 54,
     "BS Computer Science": 60,
@@ -162,11 +164,16 @@
   ],
   "validationStatus": "verified_against_new_full_pdf",
   "sourceComparison": {
-    "source": "Final CSET Mid Term Examination Fall 2026.pdf",
+    "source": "Final updated CSET Mid Term Examination Fall 2026.pdf",
     "totalPagesInPDF": 24,
     "totalExamRowsInPDF": 413,
     "pagesCoveredInDataset": 24,
     "datasetCoverage": "Pages 1-24 (413 records)",
+    "pageLevelRecordChecks": {
+      "recordsChecked": 413,
+      "recordsMatched": 413,
+      "mismatches": 0
+    },
     "jsonRecordsCompared": 413,
     "fieldComparison": "All populated source rows parsed and normalized across date, day, time, slot, program, semester, section, shift, room, students, course code, course title, and invigilator fields.",
     "parseErrors": []
@@ -186,12 +193,13 @@
   "runtimeChecks": {
     "javascriptSyntax": "passed",
     "jsonParse": "passed",
-    "browserInteraction": "passed (local Chrome headless smoke test; dashboard rendered 413 records)",
-    "browserPrinting": "passed (local Chrome headless print-to-PDF smoke test)",
-    "pdfExport": "code path validated; local browser print PDF generated successfully"
+    "browserInteraction": "passed (local browser rendered 413 records across 11 programs)",
+    "browserPrinting": "passed (print media rendered the institutional header and all 413 schedule rows)",
+    "pdfExport": "passed (Complete Date Sheet download saved a 1,264,897-byte, 25-page PDF; its institutional header and schedule content were verified)"
   },
   "sourceNotes": [
-    "The newest full timetable PDF supersedes older extracted TXT/MD files and the prior dataset.",
+    "The uploaded source PDF is byte-for-byte identical to the previously verified 24-page source; all 413 schedule records already matched their assigned source pages, so no schedule values required changes.",
+    "The newest full CSET examination PDF supersedes older extracted TXT/MD files and the prior dataset.",
     "No populated source row had an unassigned invigilator; Not Available remains the runtime fallback for future blank values."
   ]
 }

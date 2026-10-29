@@ -8,11 +8,11 @@ The project uses the verified schedule data extracted from the official universi
 
 ## Source Data Files
 
-The official source PDF used for verification is `Final CSET Mid Term Examination Fall 2026.pdf` (24 pages, 413 populated examination records). It is identified in `data/verification_report.json`. The extracted source material and schedule records are stored in the project root and data folder:
+The official source PDF used for verification is `Final updated CSET Mid Term Examination Fall 2026.pdf` (24 pages, 413 populated examination records). Its SHA-256 is `72c04b32bb495977ccc1359c8a7821d038db3cf37bd254ba72e5eb6ee3de0d70`; the file and record-level verification are documented in `data/verification_report.json`. The extracted source material and schedule records are stored in the project root and data folder:
 
 - `CSET_Mid_Term_Examination_Fall_2026.txt`
 - `CSET_Mid_Term_Examination_Fall_2026.md`
-- `Final CSET Mid Term Examination Fall 2026.pdf`
+- `Final updated CSET Mid Term Examination Fall 2026.pdf`
 - `data/exam_schedule.js`
 - `data/exam_schedule.json`
 - `data/verification_report.json`
