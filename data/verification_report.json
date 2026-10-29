@@ -1,20 +1,15 @@
 {
-  "totalRecords": 412,
-  "pages": 18,
-  "rejectedSources": {
-    "Teacher_Anam_Ashraf_Fall_2026.pdf": {
-      "status": "rejected",
-      "reason": "Extraction produced only numeric filler (1 1 1 ...); no schedule records recoverable.",
-      "records_contributed": 0
-    }
-  },
+  "totalRecords": 413,
+  "pages": 24,
+  "sourcePdf": "Final CSET Mid Term Examination Fall 2026.pdf",
+  "sourcePdfModified": "2026-10-29 09:42",
   "programs": {
     "BS Artificial Intelligence": 54,
     "BS Computer Science": 60,
     "BS Computer Science with Specialization Tracks": 48,
     "BS Cyber Security": 48,
     "BS Data Science": 54,
-    "BS Information Technology": 76,
+    "BS Information Technology": 77,
     "BS Software Engineering": 48,
     "BSIT ADP 2 Year": 7,
     "MS Computer Science": 3,
@@ -22,10 +17,9 @@
     "MS Information Technology": 7
   },
   "teachers": {
-    "Anam Ashraf": 4,
+    "Anam Ashraf": 3,
     "Aoun Muhammad (Computing)": 4,
     "Areesha Vania Saleem": 1,
-    "Aziz ur Rahman": 1,
     "Dr Ahsan Noor": 3,
     "Dr Ghulam Jillani Ansari": 1,
     "Dr Shahbaz Hassan Wasti": 1,
@@ -34,10 +28,10 @@
     "Dr. Binish Raza": 6,
     "Dr. Hammad Abbas": 1,
     "Dr. Hira Nazir": 7,
-    "Dr. Inam Illahi": 7,
+    "Dr. Inam Illahi": 8,
     "Dr. Muhammad Shahid Khan": 2,
     "Dr. Rubia Fatima": 4,
-    "Dr. Samina Naz": 4,
+    "Dr. Samina Naz": 5,
     "Dr. Shahzad Sarwar Bhatti": 7,
     "Dr. Shehzad Akhtar": 6,
     "Dr. Sohail Raza": 8,
@@ -45,19 +39,19 @@
     "Dr. Wasif Akbar": 8,
     "Engr. Dr. M. Naveed Yasir": 6,
     "Faiza Ali Azam": 2,
-    "Hafiz Mudassar Usman": 2,
+    "Hafiz Mudassar Usman": 4,
     "Hafiz Omer Farooq": 3,
-    "Kalsoom Akhtar": 5,
+    "Kalsoom Akhtar": 8,
     "M. Asif Nadeem": 1,
     "Maryum Shakeel": 3,
     "Miss Afshan Almas": 4,
     "Miss Afshan Qureshi": 4,
-    "Miss Aiman Ali Batool": 5,
+    "Miss Aiman Ali Batool": 4,
     "Miss Aleena shafqat": 2,
     "Miss Alina Shaikh": 3,
     "Miss Amna Ahmad": 3,
     "Miss Anoosha Nazir": 4,
-    "Miss Areej Khan": 3,
+    "Miss Areej Khan": 4,
     "Miss Arousa Khan Niazi": 2,
     "Miss Ayesha Qureshi": 2,
     "Miss Ayesha bibi": 4,
@@ -72,16 +66,16 @@
     "Miss Irum Waheed": 1,
     "Miss Jannat Aziz": 4,
     "Miss Kiran Shahzadi": 4,
-    "Miss Komal Shabir": 2,
+    "Miss Komal Shabbir": 2,
     "Miss Maham Razzaq": 4,
     "Miss Maleeha Bashir": 1,
     "Miss Maryem Ismail": 3,
     "Miss Nida Muzammil": 1,
-    "Miss Qudsia Khanam": 3,
     "Miss Rabia": 4,
-    "Miss Rozina Riaz": 4,
+    "Miss Rozina Riaz": 3,
     "Miss Saba Riaz": 1,
     "Miss Sadia Perveen": 3,
+    "Miss Sadia Ramzan": 7,
     "Miss Samavia Riaz": 1,
     "Miss Samra Mushtaq": 3,
     "Miss Sana Irshad": 4,
@@ -99,6 +93,7 @@
     "Mr Aoun Muhammad (Math)": 2,
     "Mr Ashiq Shahzad": 1,
     "Mr Faisal Shahzad": 2,
+    "Mr Ibrahim": 3,
     "Mr Khalid Mahmood": 2,
     "Mr Malik Muhammad Aqib": 4,
     "Mr Mirza Murad Baig": 8,
@@ -113,14 +108,12 @@
     "Mr Muhammad Usama": 3,
     "Mr Muhammad Usman Haider": 1,
     "Mr Nasir Umar": 2,
-    "Mr Prince Hamza": 3,
+    "Mr Prince Hamza": 4,
     "Mr Qasim Niaz": 3,
-    "Mr Sadia Ramzan": 8,
     "Mr Sana Ullah": 4,
     "Mr Syed Ahsan Shah": 3,
     "Mr Syed M. Waqas Shah": 6,
-    "Mr Syed Wajahat  Hussain naqvi": 1,
-    "Mr Syed Wajahat Hussain naqvi": 2,
+    "Mr Syed Wajahat Hussain naqvi": 3,
     "Mr Syed Zohair Quain Haider": 4,
     "Mr Umair Abid": 4,
     "Mr Zafar Ahmad": 3,
@@ -128,18 +121,16 @@
     "Mr Zia Ur Rehman Zia": 4,
     "Mr. Muhammad Manshah": 5,
     "Mr. Zeeshan Haider": 1,
-    "Mudassir Usman": 1,
     "Muhammad Ashraf": 6,
     "Muhammad Iqbal": 3,
     "Muhammad Jawad Ayyoub": 4,
     "Muhammad Naeem": 2,
-    "Munaza Younas": 1,
-    "Muntaha Zubair": 2,
+    "Munaza Younas": 2,
+    "Muntaha Zubair": 1,
     "Nawal Fatima": 2,
     "Nida Shiza": 4,
-    "Noman Khan": 1,
-    "Not Available": 6,
-    "Qudsia Khanam": 1,
+    "Noman Khan": 2,
+    "Qudsia Khanam": 4,
     "Rabia Tariq": 2,
     "Ruqia Ghafoor": 3,
     "Sajida Azeem": 4,
@@ -147,396 +138,60 @@
     "Zeeshan Yousaf": 3
   },
   "dates": {
-    "2026-10-29": 13,
-    "2026-10-30": 47,
-    "2026-11-02": 58,
-    "2026-11-03": 59,
-    "2026-11-04": 63,
-    "2026-11-05": 63,
-    "2026-11-06": 61
+    "2026-10-28": 6,
+    "2026-10-29": 21,
+    "2026-10-30": 52,
+    "2026-11-02": 63,
+    "2026-11-03": 66,
+    "2026-11-04": 69,
+    "2026-11-05": 69,
+    "2026-11-06": 67
   },
-  "missingTeachers": [
-    "exam-007",
-    "exam-061",
-    "exam-121",
-    "exam-169",
-    "exam-230",
-    "exam-306"
-  ],
+  "missingTeachers": [],
   "missingRooms": [],
   "duplicateCandidates": [],
   "unverifiedEntries": [],
-  "weekdayMismatches": [],
-  "validationStatus": "verified_with_documented_extraction_corrections",
+  "weekdayMismatches": [
+    {
+      "recordId": "exam-321",
+      "date": "2026-10-29",
+      "sourceDay": "Friday",
+      "calendarDay": "Thursday",
+      "issue": "The final PDF explicitly labels this row Friday, 29 Oct 2026; the calendar date is Thursday. Source label preserved and discrepancy documented."
+    }
+  ],
+  "validationStatus": "verified_against_new_full_pdf",
   "sourceComparison": {
-    "source": "CSET Mid Term Examination Fall 2026.pdf",
-    "totalPagesInPDF": 18,
-    "totalExamRowsInPDF": 412,
-    "pagesCoveredInDataset": 16,
-    "datasetCoverage": "Pages 1-5 and 8-18 (364 records)",
-    "omittedPagesInDataset": [
-      {
-        "pages": "6-7",
-        "program": "BS Computer Science with Specialization Tracks",
-        "semester": 1,
-        "sections": [
-          "AI-A",
-          "CS-A",
-          "CYB-A",
-          "DS-A",
-          "IT-A",
-          "SE-A"
-        ],
-        "omittedRecordsCount": 48,
-        "note": "Documented omission from the original 364-record extraction baseline."
-      }
-    ],
-    "jsonRecordsCompared": 364,
-    "fieldComparison": "All 364 records verified 100% against PDF text layer across date, day, startTime, endTime, slot, program, semester, section, shift, room, students, and invigilator fields.",
-    "courseCodeCorrections": [
-      {
-        "id": "exam-238",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-239",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-240",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-243",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-244",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-246",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-250",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-251",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-252",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-255",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-256",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-257",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-261",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-262",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-263",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-267",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-268",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-270",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-273",
-        "from": "INTE",
-        "to": "INTE-3141"
-      },
-      {
-        "id": "exam-275",
-        "from": "INTE",
-        "to": "INTE-3143"
-      },
-      {
-        "id": "exam-276",
-        "from": "INTE",
-        "to": "INTE-XXXX"
-      },
-      {
-        "id": "exam-281",
-        "from": "INTE",
-        "to": "INTE-4153"
-      },
-      {
-        "id": "exam-288",
-        "from": "INTE",
-        "to": "INTE-4153"
-      },
-      {
-        "id": "exam-135",
-        "from": "CYSE",
-        "to": "CYSE-3132",
-        "titleFrom": "-3132 Information Assurance",
-        "titleTo": "Information Assurance"
-      },
-      {
-        "id": "exam-136",
-        "from": "CYSE",
-        "to": "CYSE-3133",
-        "titleFrom": "-3133 Network Security",
-        "titleTo": "Network Security"
-      },
-      {
-        "id": "exam-137",
-        "from": "CYSE",
-        "to": "CYSE-3141",
-        "titleFrom": "-3141 Vulnerability Assessment & Reverse Engineering",
-        "titleTo": "Vulnerability Assessment & Reverse Engineering"
-      },
-      {
-        "id": "exam-138",
-        "from": "CYSE",
-        "to": "CYSE-3143",
-        "titleFrom": "-3143 Hardware Security",
-        "titleTo": "Hardware Security"
-      },
-      {
-        "id": "exam-141",
-        "from": "CYSE",
-        "to": "CYSE-3132",
-        "titleFrom": "-3132 Information Assurance",
-        "titleTo": "Information Assurance"
-      },
-      {
-        "id": "exam-142",
-        "from": "CYSE",
-        "to": "CYSE-3133",
-        "titleFrom": "-3133 Network Security",
-        "titleTo": "Network Security"
-      },
-      {
-        "id": "exam-143",
-        "from": "CYSE",
-        "to": "CYSE-3141",
-        "titleFrom": "-3141 Vulnerability Assessment & Reverse Engineering",
-        "titleTo": "Vulnerability Assessment & Reverse Engineering"
-      },
-      {
-        "id": "exam-144",
-        "from": "CYSE",
-        "to": "CYSE-3143",
-        "titleFrom": "-3143 Hardware Security",
-        "titleTo": "Hardware Security"
-      },
-      {
-        "id": "exam-147",
-        "from": "CYSE",
-        "to": "CYSE-3132",
-        "titleFrom": "-3132 Information Assurance",
-        "titleTo": "Information Assurance"
-      },
-      {
-        "id": "exam-148",
-        "from": "CYSE",
-        "to": "CYSE-3133",
-        "titleFrom": "-3133 Network Security",
-        "titleTo": "Network Security"
-      },
-      {
-        "id": "exam-149",
-        "from": "CYSE",
-        "to": "CYSE-3141",
-        "titleFrom": "-3141 Vulnerability Assessment & Reverse Engineering",
-        "titleTo": "Vulnerability Assessment & Reverse Engineering"
-      },
-      {
-        "id": "exam-150",
-        "from": "CYSE",
-        "to": "CYSE-3143",
-        "titleFrom": "-3143 Hardware Security",
-        "titleTo": "Hardware Security"
-      },
-      {
-        "id": "exam-153",
-        "from": "CYSE",
-        "to": "CYSE-4135",
-        "titleFrom": "-4135 Digital Forensics",
-        "titleTo": "Digital Forensics"
-      },
-      {
-        "id": "exam-155",
-        "from": "CYSE",
-        "to": "CYSE-4136",
-        "titleFrom": "-4136 Parallel & Distributed Computing",
-        "titleTo": "Parallel & Distributed Computing"
-      },
-      {
-        "id": "exam-159",
-        "from": "CYSE",
-        "to": "CYSE-4136",
-        "titleFrom": "-4136 Parallel & Distributed Computing",
-        "titleTo": "Parallel & Distributed Computing"
-      },
-      {
-        "id": "exam-161",
-        "from": "CYSE",
-        "to": "CYSE-4135",
-        "titleFrom": "-4135 Digital Forensics",
-        "titleTo": "Digital Forensics"
-      },
-      {
-        "id": "exam-357",
-        "from": "CYSE",
-        "to": "CYSE-6118",
-        "titleFrom": "-6118 IT Security Policy & Management",
-        "titleTo": "IT Security Policy & Management"
-      }
-    ]
+    "source": "Final CSET Mid Term Examination Fall 2026.pdf",
+    "totalPagesInPDF": 24,
+    "totalExamRowsInPDF": 413,
+    "pagesCoveredInDataset": 24,
+    "datasetCoverage": "Pages 1-24 (413 records)",
+    "jsonRecordsCompared": 413,
+    "fieldComparison": "All populated source rows parsed and normalized across date, day, time, slot, program, semester, section, shift, room, students, course code, course title, and invigilator fields.",
+    "parseErrors": []
   },
-  "confirmedDiscrepancies": [
-    {
-      "issue": "CYSE Course-code tokenization",
-      "count": 17,
-      "resolution": "Fixed extraction defect where courseCode was truncated to CYSE and numeric identifier was prepended to courseTitle (e.g. CYSE / -3132 Information Assurance corrected to CYSE-3132 / Information Assurance)."
-    },
-    {
-      "issue": "INTE Course-code tokenization",
-      "count": 23,
-      "resolution": "Merged source text formatted as INTE -NNNN into normalized code INTE-NNNN and removed fragment from course title."
-    },
-    {
-      "issue": "Omission of Specialization Tracks (Pages 6-7)",
-      "count": 48,
-      "resolution": "Successfully integrated all 48 examinations from Pages 6 and 7 for BS Computer Science with Specialization Tracks into the database. Portal now contains all 412 examinations across all 18 pages."
+  "rejectedSources": {
+    "Teacher_Anam_Ashraf_Fall_2026.pdf": {
+      "status": "rejected",
+      "reason": "Extraction produced only numeric filler (1 1 1 ...); no schedule records recoverable.",
+      "records_contributed": 0
     }
-  ],
-  "unresolvedItems": [
-    {
-      "issue": "Blank invigilator/teacher cells in official PDF",
-      "records": [
-        "exam-007",
-        "exam-061",
-        "exam-121",
-        "exam-169",
-        "exam-230",
-        "exam-306"
-      ],
-      "resolution": "Preserved strictly as Not Available in compliance with audit standards; identities not inferred or guessed."
-    }
-  ],
+  },
+  "auditHistory": {
+    "previousReportTotalRecords": 412,
+    "previousReportPages": 18,
+    "note": "Previous audit retained conceptually; active dataset and verification facts above are authoritative for the newer full PDF."
+  },
   "runtimeChecks": {
     "javascriptSyntax": "passed",
     "jsonParse": "passed",
-    "browserInteraction": "passed (fully tested with automated headless browser)",
-    "browserPrinting": "passed (verified A4 layout, headers displayed, controls hidden)",
-    "csvDownload": "passed (verified UTF-8 BOM, RFC 4180 quote escaping, sanitized filenames)",
-    "localSetup": "passed (dual zero-config local loading via data/exam_schedule.js and HTTP static server support)"
+    "browserInteraction": "passed (local Chrome headless smoke test; dashboard rendered 413 records)",
+    "browserPrinting": "passed (local Chrome headless print-to-PDF smoke test)",
+    "pdfExport": "code path validated; local browser print PDF generated successfully"
   },
-  "pdfConversion": {
-    "sourceFile": "CSET Mid Term Examination Fall 2026.pdf",
-    "totalPages": 18,
-    "status": "converted_with_page_separators",
-    "pagesProcessed": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18
-    ],
-    "notes": "All 18 PDF pages extracted with PyMuPDF. Missing teacher names were retained as blank values and flagged for manual review in the extracted content and schedule metadata.",
-    "manualReview": [
-      {
-        "page": 1,
-        "recordId": "exam-007",
-        "field": "Invigilator(s)",
-        "value": "blank",
-        "issue": "Teacher/invigilator missing in source PDF"
-      },
-      {
-        "page": 9,
-        "recordId": "exam-061",
-        "field": "Invigilator(s)",
-        "value": "blank",
-        "issue": "Teacher/invigilator missing in source PDF"
-      },
-      {
-        "page": 14,
-        "recordId": "exam-121",
-        "field": "Invigilator(s)",
-        "value": "blank",
-        "issue": "Teacher/invigilator missing in source PDF"
-      },
-      {
-        "page": 16,
-        "recordId": "exam-169",
-        "field": "Invigilator(s)",
-        "value": "blank",
-        "issue": "Teacher/invigilator missing in source PDF"
-      },
-      {
-        "page": 18,
-        "recordId": "exam-230",
-        "field": "Invigilator(s)",
-        "value": "blank",
-        "issue": "Teacher/invigilator missing in source PDF"
-      },
-      {
-        "page": 18,
-        "recordId": "exam-306",
-        "field": "Invigilator(s)",
-        "value": "blank",
-        "issue": "Teacher/invigilator missing in source PDF"
-      }
-    ]
-  }
+  "sourceNotes": [
+    "The newest full timetable PDF supersedes older extracted TXT/MD files and the prior dataset.",
+    "No populated source row had an unassigned invigilator; Not Available remains the runtime fallback for future blank values."
+  ]
 }

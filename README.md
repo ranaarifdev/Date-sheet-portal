@@ -8,10 +8,11 @@ The project uses the verified schedule data extracted from the official universi
 
 ## Source Data Files
 
-The official source PDF used for verification is identified in `data/verification_report.json`. The extracted source material and schedule records are stored in the project root and data folder:
+The official source PDF used for verification is `Final CSET Mid Term Examination Fall 2026.pdf` (24 pages, 413 populated examination records). It is identified in `data/verification_report.json`. The extracted source material and schedule records are stored in the project root and data folder:
 
 - `CSET_Mid_Term_Examination_Fall_2026.txt`
 - `CSET_Mid_Term_Examination_Fall_2026.md`
+- `Final CSET Mid Term Examination Fall 2026.pdf`
 - `data/exam_schedule.js`
 - `data/exam_schedule.json`
 - `data/verification_report.json`
@@ -34,7 +35,7 @@ The portal works as a static site and does not require a backend or build step.
 
 ## Key Features
 
-- Dashboard with overall statistics across the 412 verified examination records across all 18 pages. The displayed total is derived from the loaded, validated dataset.
+- Dashboard with overall statistics across the 413 verified examination records across all 24 pages. The displayed total is derived from the loaded, validated dataset.
 - Complete date sheet with live filtering by date, day, program, semester, section, shift, teacher/invigilator, course code, and room.
 - Teacher date sheets with focused invigilator views.
 - Program-wise schedules with optional semester, section, and shift filtering.
@@ -65,6 +66,8 @@ The generated document includes:
 ## Data Integrity and Verification
 
 The data set is based on the extracted schedule records and has been checked against the source document structure. The project keeps the original extracted records and the verification notes in `data/verification_report.json`.
+
+The final PDF contains one source-level weekday/date inconsistency: record `exam-321` is printed as `Friday, 29 Oct 2026`, although 29 October 2026 is Thursday. The PDF's printed weekday is preserved and the discrepancy is documented in the verification report.
 
 At runtime, records with an empty required value (`date`, `courseCode`, `courseTitle`, or `room`) or numeric extraction filler matching `/^\\s*1[\\s1]*$/` are rejected before they reach any view, print layout, or PDF export. The corrupted `Teacher_Anam_Ashraf_Fall_2026.pdf` extraction is documented as rejected in the verification report; its four valid schedule records from the main schedule remain preserved.
 
