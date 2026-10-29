@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 — Class-wise output hardening
+
+- Added three-pass HTML entity decoding before escaping titles for screen, print, and PDF output.
+- Confirmed the authoritative PDF's Cyber Security Semester 7 Evening `FLNG-41XX` time remains 3:30 PM–5:00 PM; no unsupported data change was made.
+
 ## 2026-10-29 — Confirm uploaded source PDF
 
 - Identified the upload as the complete 24-page CSET mid-term examination date sheet, not a regular semester class timetable.

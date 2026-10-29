@@ -20,7 +20,22 @@ function validatedRecords(records) {
   return Array.isArray(records) ? records.filter(isValidExamRecord) : [];
 }
 
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function decodeHtml(str) {
+  if (!str) return '';
+  str = String(str);
+  for (let i = 0; i < 3; i++) {
+    str = str
+      .replace(/&amp;amp;/g, '&amp;')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+  }
+  return str.replace(/\s{2,}/g, ' ').trim();
+}
+
+const esc = s => decodeHtml(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function formatDate(value) {
   const date = new Date(`${value}T00:00:00`);
@@ -513,7 +528,7 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       r.day || '',
       `${r.startTime} – ${r.endTime}`,
       r.courseCode || 'N/A',
-      r.courseTitle || 'N/A',
+      decodeHtml(r.courseTitle || 'N/A'),
       r.room || 'N/A'
     ]);
   } else if (isTeacher) {
@@ -528,7 +543,7 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       r.section || '',
       r.shift || '',
       r.courseCode || 'N/A',
-      r.courseTitle || 'N/A',
+      decodeHtml(r.courseTitle || 'N/A'),
       r.room || 'N/A'
     ]);
   } else {
@@ -543,7 +558,7 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       r.section || '',
       r.shift || '',
       r.courseCode || 'N/A',
-      r.courseTitle || 'N/A',
+      decodeHtml(r.courseTitle || 'N/A'),
       (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available',
       r.room || 'N/A'
     ]);
