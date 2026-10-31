@@ -43,7 +43,7 @@ The portal works as a static site and does not require a backend or build step.
 - **Complete Date Sheet:** Global searchable and filterable view across all 413 records with multi-attribute filtering.
 - **Teacher Date Sheets:** Dedicated invigilation duty schedules for individual faculty members.
 - **Calendar-Based View:** Chronological date-by-date exam schedules with venue and invigilator indicators.
-- **White A4 Print & PDF Export Consistency:** Clean print view and jsPDF/AutoTable exports with the official Emerson University Multan header, university logo, classroom context, teacher metadata, and styled HOD / Head of Department and Examination Coordinator signature blocks.
+- **White A4 Print & PDF Export Consistency:** Clean print view and jsPDF/AutoTable exports with the official Emerson University Multan header, university logo, classroom context, teacher metadata, and clean full-page timetable formatting.
 - **University Branding:** Official Emerson University Multan crest and institutional title blocks.
 - **Light / Dark Mode:** Toggleable color themes across the entire portal.
 
@@ -62,7 +62,7 @@ The generated document includes:
 - view-specific context such as teacher name, class, program, or complete schedule; class sheets prominently identify the program, semester, section, and shift
 - date-sheet details block with session, type, selection, paper count, and generation date
 - repeated column headers on multi-page output where possible
-- styled HOD / Head of Department and Examination Coordinator signature blocks
+- official departmental footer and page numbering
 - a single, clear institutional header and correct page numbering in downloaded PDFs
 
 ## Data Integrity and Verification

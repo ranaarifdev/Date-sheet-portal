@@ -690,48 +690,6 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     }
   });
 
-  // Keep signatures below the table and never overlap the last table row.
-  const finalY = doc.lastAutoTable?.finalY || y;
-  const signatureHeight = 36;
-  const bottomSignatureY = pageH - 14 - signatureHeight;
-  let footerY = Math.max(finalY + 10, bottomSignatureY);
-  if (footerY > bottomSignatureY) {
-    doc.addPage();
-    drawPageHeader();
-    footerY = bottomSignatureY;
-  }
-
-  const signatureGap = 8;
-  const signatureWidth = (usableW - signatureGap) / 2;
-  const signatureLabels = ['HOD / Head of Department', 'Examination Coordinator'];
-  doc.setFontSize(8);
-  doc.setLineWidth(0.25);
-  signatureLabels.forEach((label, index) => {
-    const x = margin + index * (signatureWidth + signatureGap);
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(150, 165, 180);
-    doc.roundedRect(x, footerY, signatureWidth, signatureHeight, 2, 2, 'FD');
-    doc.setFillColor(15, 76, 129);
-    doc.roundedRect(x, footerY, signatureWidth, 8, 2, 2, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(label, x + signatureWidth / 2, footerY + 5.5, { align: 'center' });
-    doc.setTextColor(0, 0, 0);
-  });
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  const sigLabels = ['Signature:', 'Name:', 'Date:'];
-  sigLabels.forEach((label, idx) => {
-    const rowY = footerY + 15 + idx * 7;
-    for (let index = 0; index < signatureLabels.length; index++) {
-      const x = margin + index * (signatureWidth + signatureGap);
-      doc.text(label, x + 5, rowY);
-      doc.setDrawColor(80, 95, 110);
-      doc.line(x + 24, rowY + 0.5, x + signatureWidth - 5, rowY + 0.5);
-    }
-  });
-
   const totalPages = doc.internal.getNumberOfPages();
   for (let pg = 1; pg <= totalPages; pg++) {
     doc.setPage(pg);

@@ -20,7 +20,7 @@
   - Added a dedicated "Live Tracker" view and top navigation shortcut.
 
 - **Print & PDF Export Consistency:**
-  - Restored and styled official HOD / Head of Department and Examination Coordinator signature blocks across white A4 print layouts and AutoTable PDF exports.
+  - Removed bottom signature boxes from PDF exports to maintain clean, unobstructed full-width timetable output.
   - Preserved Emerson University Multan header, official logo, room details, and teacher metadata in all export formats.
 
 ## 2026-10-29 — Class-wise output hardening
