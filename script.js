@@ -479,29 +479,9 @@ window.addEventListener('afterprint', () => {
 });
 
 /* ============================================================
-   PDF DOWNLOAD — directly saves a .pdf file via jsPDF
+   SHARED PDF GENERATION ENGINE
    ============================================================ */
-function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf') {
-  if (!rows || !rows.length) {
-    alert('No records to export. Please make a selection first.');
-    return;
-  }
-
-  const resolvedMeta = { ...getPrintMeta(rows), ...meta, totalPapers: rows.length };
-  resolvedMeta.detail = stripLabelPrefix(resolvedMeta.detail || '', resolvedMeta.detailLabel || '');
-  resolvedMeta.generatedOn = stripLabelPrefix(resolvedMeta.generatedOn || '', 'Generated');
-
-  const JspdfCtor = window.jspdf?.jsPDF;
-  const hasPdfTablePlugin = !!(JspdfCtor && (
-    typeof JspdfCtor.prototype?.autoTable === 'function' ||
-    typeof JspdfCtor.API?.autoTable === 'function'
-  ));
-
-  if (!JspdfCtor || !hasPdfTablePlugin) {
-    alert('PDF library is still loading. Please wait a moment and try again.');
-    return;
-  }
-
+function generatePdfDocContent(doc, rows, resolvedMeta) {
   const isTeacher = view === 'teacher';
   const isClass = view === 'class';
   const isProgram = view === 'program';
@@ -512,12 +492,10 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   const pageH = isClass ? 297 : 210;
   const margin = 14;
   const usableW = pageW - margin * 2;
-
-  const doc = new window.jspdf.jsPDF({ orientation, unit: 'mm', format: 'a4' });
   const cx = pageW / 2;
 
   const title   = resolvedMeta.title   || 'EMERSON UNIVERSITY MULTAN';
-  const dept    = resolvedMeta.department || 'Department of Computing & Emerging Technology';
+  const dept    = resolvedMeta.department || 'Faculty of Computing & Emerging Technologies';
   const heading = resolvedMeta.heading  || 'CSET Mid Term Examination — Fall 2026';
   const semLbl  = resolvedMeta.semesterLabel || resolvedMeta.session || 'Fall 2026';
   const subtitle = resolvedMeta.subtitle || resolvedMeta.sheetType || 'Examination Date Sheet';
@@ -684,7 +662,6 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
   // Build column styles for better layout control
   let columnStyles = {};
   if (isClass) {
-    // Portrait A4: 182mm usable. Sr(8) Date(22) Day(16) Time(22) Code(16) Title(flex) Teacher(38) Room(20)
     columnStyles = {
       0: { cellWidth: 8 },
       1: { cellWidth: 22 },
@@ -696,7 +673,6 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       7: { cellWidth: 20 }
     };
   } else if (isTeacher) {
-    // Landscape A4: 269mm usable. Sr(8) Date(20) Day(16) Time(20) Prog(flex) Sem(10) Sec(10) Shift(16) Code(14) Title(flex) Room(18)
     columnStyles = {
       0: { cellWidth: 8 },
       1: { cellWidth: 20 },
@@ -711,7 +687,6 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       10: { cellWidth: 18 }
     };
   } else if (isProgram) {
-    // Landscape A4. Sr(8) Date(20) Day(16) Time(20) Sem(10) Sec(10) Shift(16) Code(14) Title(flex) Teacher(flex) Room(18)
     columnStyles = {
       0: { cellWidth: 8 },
       1: { cellWidth: 20 },
@@ -726,7 +701,6 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
       10: { cellWidth: 18 }
     };
   } else {
-    // Complete / Calendar. Landscape. Prog col wider, teacher/title auto
     columnStyles = {
       0: { cellWidth: 8 },
       1: { cellWidth: 20 },
@@ -780,7 +754,120 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     doc.text(`Page ${pg} of ${totalPages}`, pageW - margin, pageH - 6, { align: 'right' });
   }
 
-  doc.save(filename);
+  return doc;
+}
+
+function createPdfDocument(rows, meta = {}) {
+  if (!rows || !rows.length) {
+    alert('No records to display. Please make a selection first.');
+    return null;
+  }
+
+  const resolvedMeta = { ...getPrintMeta(rows), ...meta, totalPapers: rows.length };
+  resolvedMeta.detail = stripLabelPrefix(resolvedMeta.detail || '', resolvedMeta.detailLabel || '');
+  resolvedMeta.generatedOn = stripLabelPrefix(resolvedMeta.generatedOn || '', 'Generated');
+
+  const JspdfCtor = window.jspdf?.jsPDF;
+  const hasPdfTablePlugin = !!(JspdfCtor && (
+    typeof JspdfCtor.prototype?.autoTable === 'function' ||
+    typeof JspdfCtor.API?.autoTable === 'function'
+  ));
+
+  if (!JspdfCtor || !hasPdfTablePlugin) {
+    alert('PDF library is still loading. Please wait a moment and try again.');
+    return null;
+  }
+
+  const isClass = view === 'class';
+  const orientation = isClass ? 'portrait' : 'landscape';
+  const doc = new window.jspdf.jsPDF({ orientation, unit: 'mm', format: 'a4' });
+
+  generatePdfDocContent(doc, rows, resolvedMeta);
+
+  return {
+    doc,
+    filename: resolvedMeta.filename || 'CSET_Date_Sheet_Fall_2026.pdf',
+    title: resolvedMeta.subtitle || resolvedMeta.sheetType || 'Examination Date Sheet',
+    detail: resolvedMeta.detail || ''
+  };
+}
+
+function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf') {
+  const result = createPdfDocument(rows, { ...meta, filename });
+  if (!result) return;
+  result.doc.save(filename || result.filename);
+}
+
+/* ============================================================
+   INTERACTIVE PDF PREVIEW MODAL CONTROLLER
+   ============================================================ */
+let currentPdfBlobUrl = null;
+let currentPreviewDoc = null;
+let currentPreviewFilename = '';
+
+function openPdfModal(blobUrl, filename, title, detail) {
+  const modal = document.getElementById('pdf-preview-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('modal-pdf-title');
+  const subtitleEl = document.getElementById('modal-pdf-subtitle');
+  const iframe = document.getElementById('pdf-preview-frame');
+
+  if (titleEl) titleEl.textContent = title || 'PDF Timetable Preview';
+  if (subtitleEl) subtitleEl.textContent = detail ? `${detail} · ${filename}` : filename;
+  if (iframe) iframe.src = blobUrl;
+
+  modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
+
+function closePdfModal() {
+  const modal = document.getElementById('pdf-preview-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  document.body.classList.remove('modal-open');
+
+  const iframe = document.getElementById('pdf-preview-frame');
+  if (iframe) {
+    iframe.src = 'about:blank';
+  }
+
+  if (currentPdfBlobUrl) {
+    URL.revokeObjectURL(currentPdfBlobUrl);
+    currentPdfBlobUrl = null;
+  }
+  currentPreviewDoc = null;
+}
+
+function viewPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf') {
+  const rowsToView = (rows && rows.length) ? rows : getCurrentPrintRows();
+  if (!rowsToView || !rowsToView.length) {
+    alert('No records selected. Please make a selection first.');
+    return;
+  }
+
+  const result = createPdfDocument(rowsToView, { ...meta, filename });
+  if (!result) return;
+
+  const { doc, filename: resolvedFilename, title, detail } = result;
+  currentPreviewDoc = doc;
+  currentPreviewFilename = filename || resolvedFilename;
+
+  if (currentPdfBlobUrl) {
+    URL.revokeObjectURL(currentPdfBlobUrl);
+    currentPdfBlobUrl = null;
+  }
+
+  const blob = doc.output('blob');
+  currentPdfBlobUrl = URL.createObjectURL(blob);
+
+  openPdfModal(currentPdfBlobUrl, currentPreviewFilename, title, detail);
+}
+
+function triggerPrint(rows, metaOverride) {
+  // Routes to interactive PDF preview modal
+  viewPdf(rows, metaOverride);
 }
 
 function pdfFilename(prefix, parts) {
@@ -1095,6 +1182,8 @@ function live() {
   renderLiveTrackerWidget($('#dedicatedLiveContainer'), true);
 }
 
+const VIEW_PDF_BTN_HTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>View PDF`;
+
 /* ============================================================
    FILTER PANEL  (Complete date sheet)
    ============================================================ */
@@ -1113,7 +1202,7 @@ function filters() {
   <div class="toolbar no-print" style="margin-top:14px">
     <button class="primary" id="apply">Apply filters</button>
     <button class="secondary" id="reset">Reset filters</button>
-    <button class="secondary" id="print">Print results</button>
+    <button class="secondary" id="print">${VIEW_PDF_BTN_HTML}</button>
     <button class="secondary" id="pdfDownload">Download PDF</button>
   </div>`;
 }
@@ -1180,10 +1269,10 @@ function bindComplete() {
   };
   $('#print').onclick = () => {
     const res = filtered();
-    triggerPrint(res, {
+    viewPdf(res, {
       subtitle: 'Complete Examination Date Sheet',
       detail: `Total records: ${res.length}`
-    });
+    }, pdfFilename('Complete_Examination', []));
   };
   $('#pdfDownload').onclick = () => {
     const res = filtered();
@@ -1209,7 +1298,7 @@ function teacher() {
     <div class="toolbar">
       ${selector('Teacher', 'teacherSelect', getTeachers())}
       <button class="primary" id="viewTeacher">View schedule</button>
-      <button class="secondary" id="teacherPrint">Print</button>
+      <button class="secondary" id="teacherPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="teacherPdf">Download PDF</button>
     </div>
     <div id="teacherResult" style="margin-top:18px"></div>`
@@ -1223,10 +1312,10 @@ function teacher() {
       return;
     }
     const teacherName = $('#teacherSelect').value;
-    triggerPrint(selected, {
+    viewPdf(selected, {
       subtitle: 'Teacher-Wise Examination Date Sheet',
       detail: `Teacher / Invigilator: ${teacherName}`
-    });
+    }, pdfFilename('Teacher', [teacherName]));
   };
 
   $('#teacherPdf').onclick = () => {
@@ -1296,7 +1385,7 @@ function program(targetProgram = '') {
       ${selector('Section', 'programSec', [])}
       ${selector('Shift', 'programShift', [])}
       <button class="primary" id="programView">View date sheet</button>
-      <button class="secondary" id="programPrint">Print</button>
+      <button class="secondary" id="programPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="programPdf">Download PDF</button>
     </div>
     <div id="programResult" style="margin-top:18px"></div>`
@@ -1385,7 +1474,11 @@ function program(targetProgram = '') {
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
     if (activeProgramDay) detail += ` · ${activeProgramDay}`;
-    triggerPrint(selected, { subtitle: 'Program-Wise Examination Date Sheet', detail });
+    viewPdf(
+      selected,
+      { subtitle: 'Program-Wise Examination Date Sheet', detail },
+      pdfFilename('Program', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift, activeProgramDay])
+    );
   };
 
   $('#programPdf').onclick = () => {
@@ -1511,7 +1604,7 @@ function classView() {
       ${selector('Section', 'classSec', [], 'Select Section')}
       ${selector('Shift', 'classSh', [], 'Select Shift')}
       <button class="primary" id="classSubmit">View class sheet</button>
-      <button class="secondary" id="classPrint">Print</button>
+      <button class="secondary" id="classPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="classPdf" title="Download selected class as PDF">Download PDF</button>
     </div>
     <div id="classResult" style="margin-top:18px"></div>`
@@ -1613,10 +1706,10 @@ function classView() {
     const s = sSel.value;
     const sec = secSel.value;
     const sh = shSel.value;
-    triggerPrint(selected, {
+    viewPdf(selected, {
       subtitle: 'Class-Wise Examination Date Sheet',
       detail: `${p} · Semester ${s} · Section ${sec} · ${sh} Shift`
-    });
+    }, pdfFilename(safe(p), [`Semester_${s}`, `Section_${sec}`, sh]));
   };
 
   $('#classPdf').onclick = () => {
@@ -1671,7 +1764,7 @@ function calendar() {
       ${selector('Teacher', 'calTeacher', getTeachers())}
       ${selector('Program', 'calProgram', uniq('program'))}
       <button class="primary" id="calApply">Filter calendar</button>
-      <button class="secondary" id="calPrint">Print calendar</button>
+      <button class="secondary" id="calPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="calPdf">Download PDF</button>
     </div>
     <div id="calContent" style="margin-top:14px">
@@ -1701,10 +1794,10 @@ function calendar() {
   $('#calTeacher').onchange = calendar;
   $('#calProgram').onchange = calendar;
   $('#calPrint').onclick = () => {
-    triggerPrint(matched, {
+    viewPdf(matched, {
       subtitle: 'Examination Calendar',
       detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
-    });
+    }, pdfFilename('Examination_Calendar', [tFilter, pFilter]));
   };
   $('#calPdf').onclick = () => downloadPdf(matched, {
     subtitle: 'Examination Calendar',
@@ -1802,7 +1895,7 @@ function dashboard() {
       <div class="section-title-row">
         <div>
           <h3 style="margin:0 0 4px">Explore by Degree Program (${programs.length})</h3>
-          <p class="muted" style="margin:0;font-size:12.5px">Select any academic program to instantly browse, print, or download its official Mid-Term schedule.</p>
+          <p class="muted" style="margin:0;font-size:12.5px">Select any academic program to instantly browse, view PDF preview, or download its official Mid-Term schedule.</p>
         </div>
         <div class="program-search-box">
           <input type="text" id="progSearchInput" placeholder="Search program (e.g. Cyber, AI)..." oninput="filterProgramCards(this.value)">
@@ -1874,6 +1967,35 @@ function initApp() {
     console.error('CSET Portal: #app element not found in DOM.');
     return;
   }
+
+  // Bind PDF Preview Modal listeners
+  const modal = document.getElementById('pdf-preview-modal');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const modalDownloadBtn = document.getElementById('modal-download-btn');
+
+  if (modalCloseBtn) {
+    modalCloseBtn.onclick = closePdfModal;
+  }
+  if (modalDownloadBtn) {
+    modalDownloadBtn.onclick = () => {
+      if (currentPreviewDoc) {
+        currentPreviewDoc.save(currentPreviewFilename || 'CSET_Date_Sheet_Fall_2026.pdf');
+      }
+    };
+  }
+  if (modal) {
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        closePdfModal();
+      }
+    };
+  }
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.style.display !== 'none') {
+      closePdfModal();
+    }
+  });
+
   if (window.EXAM_DATA && Array.isArray(window.EXAM_DATA) && window.EXAM_DATA.length > 0) {
     data = validatedRecords(window.EXAM_DATA);
     dashboard();
