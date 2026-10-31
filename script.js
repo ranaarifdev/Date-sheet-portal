@@ -1,5 +1,5 @@
 const $ = s => document.querySelector(s);
-const app = $('#app');
+let app = null; // set in initApp after DOM ready
 let data = [];
 let view = 'dashboard';
 let selected = [];
@@ -8,6 +8,7 @@ let simulationMode = 'real';
 let simulatedTime = null;
 let currentLiveProgFilter = '';
 let activeProgramTab = '';
+let activeProgramDay = ''; // day-wise filter for Program Sheets view
 
 // Keep malformed extraction artifacts out of every view, export, and print path.
 const NUMERIC_FILLER = /^\s*1[\s1]*$/;
@@ -188,6 +189,11 @@ function getCurrentPrintRows() {
   if (view === 'teacher' || view === 'program' || view === 'class' || view === 'calendar') {
     return [...selected].sort(sortBySchedule);
   }
+  if (view === 'live') {
+    // Export all data or a filtered subset; selected may be empty from live view
+    const rows = selected.length ? selected : [...data];
+    return rows.sort(sortBySchedule);
+  }
   if (view === 'complete') {
     return filtered().sort(sortBySchedule);
   }
@@ -229,6 +235,7 @@ function getPrintMeta(rows) {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
+    if (activeProgramDay) detail += ` · ${activeProgramDay}`;
     return {
       ...base,
       sheetType: 'Program-Wise Date Sheet',
@@ -259,6 +266,15 @@ function getPrintMeta(rows) {
       detailLabel: 'Calendar Scope',
       detail: 'Departmental Examination Schedule',
       subtitle: 'Examination Calendar'
+    };
+  }
+  if (view === 'live') {
+    return {
+      ...base,
+      sheetType: 'Live Tracker Export',
+      detailLabel: 'Export Type',
+      detail: 'Real-Time Examination Status',
+      subtitle: 'Live Examination Tracker'
     };
   }
   return {
@@ -665,6 +681,68 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
 
   const pageFooterLeft = 'Emerson University Multan - FCET';
 
+  // Build column styles for better layout control
+  let columnStyles = {};
+  if (isClass) {
+    // Portrait A4: 182mm usable. Sr(8) Date(22) Day(16) Time(22) Code(16) Title(flex) Teacher(38) Room(20)
+    columnStyles = {
+      0: { cellWidth: 8 },
+      1: { cellWidth: 22 },
+      2: { cellWidth: 16 },
+      3: { cellWidth: 22 },
+      4: { cellWidth: 16 },
+      5: { cellWidth: 'auto' },
+      6: { cellWidth: 40 },
+      7: { cellWidth: 20 }
+    };
+  } else if (isTeacher) {
+    // Landscape A4: 269mm usable. Sr(8) Date(20) Day(16) Time(20) Prog(flex) Sem(10) Sec(10) Shift(16) Code(14) Title(flex) Room(18)
+    columnStyles = {
+      0: { cellWidth: 8 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 16 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 'auto' },
+      5: { cellWidth: 10 },
+      6: { cellWidth: 10 },
+      7: { cellWidth: 16 },
+      8: { cellWidth: 14 },
+      9: { cellWidth: 'auto' },
+      10: { cellWidth: 18 }
+    };
+  } else if (isProgram) {
+    // Landscape A4. Sr(8) Date(20) Day(16) Time(20) Sem(10) Sec(10) Shift(16) Code(14) Title(flex) Teacher(flex) Room(18)
+    columnStyles = {
+      0: { cellWidth: 8 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 16 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 10 },
+      5: { cellWidth: 10 },
+      6: { cellWidth: 16 },
+      7: { cellWidth: 14 },
+      8: { cellWidth: 'auto' },
+      9: { cellWidth: 'auto' },
+      10: { cellWidth: 18 }
+    };
+  } else {
+    // Complete / Calendar. Landscape. Prog col wider, teacher/title auto
+    columnStyles = {
+      0: { cellWidth: 8 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 16 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 'auto' },
+      5: { cellWidth: 10 },
+      6: { cellWidth: 10 },
+      7: { cellWidth: 16 },
+      8: { cellWidth: 14 },
+      9: { cellWidth: 'auto' },
+      10: { cellWidth: 'auto' },
+      11: { cellWidth: 18 }
+    };
+  }
+
   doc.autoTable({
     startY: y,
     margin: { top: classContext ? 48 : 42, right: margin, bottom: 14, left: margin },
@@ -673,17 +751,19 @@ function downloadPdf(rows, meta = {}, filename = 'CSET_Date_Sheet_Fall_2026.pdf'
     theme: 'grid',
     showHead: 'everyPage',
     styles: {
-      fontSize: isClass ? 8.5 : 7.2,
-      cellPadding: 2,
+      fontSize: isClass ? 8.5 : 7.5,
+      cellPadding: { top: 2, right: 2.5, bottom: 2, left: 2.5 },
       textColor: [0, 0, 0],
-      overflow: 'linebreak'
+      overflow: 'linebreak',
+      minCellHeight: 0
     },
     headStyles: {
       fillColor: [220, 232, 240],
       textColor: [0, 0, 0],
       fontStyle: 'bold',
-      fontSize: isClass ? 8 : 6.8
+      fontSize: isClass ? 8 : 7
     },
+    columnStyles,
     rowPageBreak: 'avoid',
     didDrawPage: () => {
       drawPageHeader();
@@ -977,7 +1057,11 @@ function renderLiveTrackerWidget(container, isDedicatedView = false) {
 
 /* Real-time ticker to keep clock and countdowns live */
 function startLiveTicker() {
-  if (liveTickerInterval) clearInterval(liveTickerInterval);
+  // Always clear any existing interval first to prevent stacking
+  if (liveTickerInterval) {
+    clearInterval(liveTickerInterval);
+    liveTickerInterval = null;
+  }
   liveTickerInterval = setInterval(() => {
     const clockEl = document.getElementById('liveClockText');
     if (clockEl) {
@@ -1258,6 +1342,7 @@ function program(targetProgram = '') {
 
   progSelect.onchange = () => {
     activeProgramTab = progSelect.value;
+    activeProgramDay = ''; // reset day filter when program changes
     document.querySelectorAll('.chip-btn').forEach(btn => {
       btn.classList.toggle('active', btn.textContent.trim() === progSelect.value);
     });
@@ -1270,11 +1355,13 @@ function program(targetProgram = '') {
   semSelect.onchange = () => {
     secSelect.value = '';
     shiftSelect.value = '';
+    activeProgramDay = ''; // reset day filter when semester changes
     updateCascade('semester');
   };
 
   secSelect.onchange = () => {
     shiftSelect.value = '';
+    activeProgramDay = ''; // reset day filter when section changes
     updateCascade('section');
   };
 
@@ -1297,6 +1384,7 @@ function program(targetProgram = '') {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
+    if (activeProgramDay) detail += ` · ${activeProgramDay}`;
     triggerPrint(selected, { subtitle: 'Program-Wise Examination Date Sheet', detail });
   };
 
@@ -1313,10 +1401,11 @@ function program(targetProgram = '') {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
+    if (activeProgramDay) detail += ` · ${activeProgramDay}`;
     downloadPdf(
       selected,
       { subtitle: 'Program-Wise Examination Date Sheet', detail },
-      pdfFilename('Program', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift])
+      pdfFilename('Program', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift, activeProgramDay])
     );
   };
 
@@ -1332,10 +1421,32 @@ window.selectProgramChip = function(progName) {
   }
 };
 
+/* ============================================================
+   DAY-WISE FILTER HELPERS (Program Sheets)
+   ============================================================ */
+const ALL_DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+function buildDayChips(availableDays, selectedDay) {
+  const sorted = [...availableDays].sort((a, b) => ALL_DAYS_ORDER.indexOf(a) - ALL_DAYS_ORDER.indexOf(b));
+  if (!sorted.length) return '';
+  return `<div class="day-chip-container no-print" id="programDayChipsBar">
+    <span class="day-chip-label">Filter by Day:</span>
+    <button class="chip-btn${!selectedDay ? ' active' : ''}" onclick="setProgDayFilter('')">All Days</button>
+    ${sorted.map(d => `<button class="chip-btn${d === selectedDay ? ' active' : ''}" onclick="setProgDayFilter('${esc(d)}')">${esc(d)}</button>`).join('')}
+  </div>`;
+}
+
+window.setProgDayFilter = function(day) {
+  activeProgramDay = day;
+  renderProgram();
+};
+
 function renderProgram() {
   const p = $('#programSelect')?.value;
   if (!p) {
     selected = [];
+    const dayChipsEl = document.getElementById('programDayChipsBar');
+    if (dayChipsEl) dayChipsEl.outerHTML = '';
     $('#programResult').innerHTML = '<div class="empty">Please select a degree program to continue.</div>';
     return;
   }
@@ -1343,20 +1454,46 @@ function renderProgram() {
   const sec = $('#programSec')?.value;
   const shift = $('#programShift')?.value;
 
-  selected = data.filter(x => {
+  // Base filtered set (pre day-filter) — used for deriving available days
+  const baseFiltered = data.filter(x => {
     if (x.program !== p) return false;
     if (sem && String(x.semester) !== sem) return false;
     if (sec && x.section !== sec) return false;
     if (shift && x.shift !== shift) return false;
     return true;
+  });
+
+  // Available days derived from the base (pre day-filter) records
+  const availableDays = [...new Set(baseFiltered.map(x => x.day).filter(Boolean))];
+
+  // If the active day filter is no longer valid (program changed), reset it
+  if (activeProgramDay && !availableDays.includes(activeProgramDay)) {
+    activeProgramDay = '';
+  }
+
+  // Apply day filter on top
+  selected = baseFiltered.filter(x => {
+    if (activeProgramDay && x.day !== activeProgramDay) return false;
+    return true;
   }).sort(sortBySchedule);
+
+  // Inject or update the day chips bar (between toolbar and result)
+  const existingChipsBar = document.getElementById('programDayChipsBar');
+  const chipsHtml = buildDayChips(availableDays, activeProgramDay);
+  const resultDiv = $('#programResult');
+  if (existingChipsBar) {
+    existingChipsBar.outerHTML = chipsHtml || '';
+  } else if (chipsHtml && resultDiv) {
+    resultDiv.insertAdjacentHTML('beforebegin', chipsHtml);
+  }
 
   let subtitle = esc(p);
   if (sem) subtitle += ` · Semester ${esc(sem)}`;
   if (sec) subtitle += ` · Section ${esc(sec)}`;
   if (shift) subtitle += ` · ${esc(shift)}`;
+  if (activeProgramDay) subtitle += ` · ${esc(activeProgramDay)}`;
 
-  $('#programResult').innerHTML = `<h3>${subtitle} · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>${table(selected, 'program')}`;
+  resultDiv.innerHTML = `<h3>${subtitle} · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>${table(selected, 'program')}`;
 }
 
 /* ============================================================
@@ -1518,6 +1655,9 @@ function calendar() {
     if (pFilter && x.program !== pFilter) return false;
     return true;
   }).sort(sortBySchedule);
+
+  // Keep selected in sync so print/PDF paths work from calendar view
+  selected = matched;
 
   matched.forEach(x => {
     (groups[x.date] ??= []).push(x);
@@ -1695,6 +1835,12 @@ function dashboard() {
    ROUTING
    ============================================================ */
 function show(v, param = '') {
+  // Clear live ticker interval when leaving live/dashboard views;
+  // it will be re-started only when dashboard or live view loads.
+  if (liveTickerInterval && v !== 'live' && v !== 'dashboard') {
+    clearInterval(liveTickerInterval);
+    liveTickerInterval = null;
+  }
   view = v;
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   const views = {
@@ -1722,6 +1868,12 @@ $('#theme').onclick = () => {
    INIT
    ============================================================ */
 function initApp() {
+  // Resolve app element here — guarantees DOM is ready
+  app = document.getElementById('app');
+  if (!app) {
+    console.error('CSET Portal: #app element not found in DOM.');
+    return;
+  }
   if (window.EXAM_DATA && Array.isArray(window.EXAM_DATA) && window.EXAM_DATA.length > 0) {
     data = validatedRecords(window.EXAM_DATA);
     dashboard();

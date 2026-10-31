@@ -400,6 +400,28 @@ tr:hover td {
   border-color: #0f4c81;
 }
 
+/* Day-wise Filter Chips */
+.day-chip-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 16px;
+  padding: 8px 12px;
+  background: #edf5f8;
+  border-radius: 8px;
+  border: 1px solid #d0e2ec;
+}
+.day-chip-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f4c81;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
 /* Live Status Widget */
 .live-widget-card {
   border-radius: 14px;
@@ -609,16 +631,21 @@ footer {
   .brand small { font-size: 10px; }
   .event { grid-template-columns: 1fr; }
   .card { padding: 15px; }
+  /* Live tracker mobile */
+  .active-exams-grid { grid-template-columns: 1fr !important; }
+  .live-topbar { flex-direction: column; align-items: stretch; }
+  .time-sim-wrapper { flex-wrap: wrap; gap: 6px; }
+  .countdown-strip { gap: 6px; }
+  .countdown-unit { min-width: 44px; }
+  /* Program directory mobile */
+  .program-grid { grid-template-columns: 1fr !important; }
+  /* Day chips mobile */
+  .day-chip-container { gap: 4px; flex-wrap: wrap; }
 }
 
 /* ============================================================
    PRINT DOCUMENT — screen preview (dark card style)
    ============================================================ */
-@page {
-  size: A4 landscape;
-  margin: 12mm 10mm;
-}
-
 .print-sheet {
   display: none;
   width: 100%;
@@ -894,12 +921,12 @@ footer {
    ============================================================ */
 @media print {
   @page {
-    size: A4;
-    margin: 0;
+    size: A4 landscape;
+    margin: 12mm 10mm;
   }
   @page classSheet {
     size: A4 portrait;
-    margin: 0;
+    margin: 12mm 10mm;
   }
   * {
     -webkit-print-color-adjust: exact !important;
@@ -1125,8 +1152,14 @@ footer {
   }
 
   .top, nav, .hero, footer, .no-print,
-  .toolbar, .filters, .field, button, select, input, #theme {
+  .toolbar, .filters, .field, button, select, input, #theme,
+  .day-chip-container, #programDayChipsBar {
     display: none !important;
+  }
+
+  /* Prevent table-wrap from clipping in print */
+  .table-wrap {
+    overflow: visible !important;
   }
 
   main {
