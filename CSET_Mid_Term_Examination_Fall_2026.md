@@ -212,7 +212,7 @@ The table below is regenerated from the newest full PDF. Blank timetable slots i
 | 202 | 12 | 2026-11-03 | Tuesday | 3:00 PM?4:30 PM | BS Cyber Security | Evening | 7 | A | CYSE-4151 | Embedded Systems | CTB1F-03 | 46 | Mr Umair Abid |
 | 203 | 12 | 2026-11-04 | Wednesday | 3:00 PM?4:30 PM | BS Cyber Security | Evening | 7 | A | CYSE-4136 | Parallel & Distributed Computing | CTB1F-03 | 46 | Miss Aiman Ali Batool |
 | 204 | 12 | 2026-11-05 | Thursday | 3:00 PM?4:30 PM | BS Cyber Security | Evening | 7 | A | COSC-4113 | Analysis of Algorithms | CTB1F-03 | 46 | Miss Kiran Shahzadi |
-| 205 | 12 | 2026-11-06 | Friday | 3:00 PM?4:30 PM | BS Cyber Security | Evening | 7 | A | FLNG-41XX | Foreign Language | CTB1F-03 | 46 | Muhammad Ashraf |
+| 205 | 12 | 2026-11-06 | Friday | 3:30 PM?5:00 PM | BS Cyber Security | Evening | 7 | A | FLNG-41XX | Foreign Language | CTB1F-03 | 46 | Muhammad Ashraf |
 | 206 | 13 | 2026-11-02 | Monday | 9:00 AM?10:30 AM | BS Cyber Security | Morning | 7 | A | FLNG-41XX | Foreign Language | CTB1F-06 | 58 | Mr Muhammad Inam Makki Khan |
 | 207 | 13 | 2026-11-03 | Tuesday | 9:00 AM?10:30 AM | BS Cyber Security | Morning | 7 | A | CYSE-4136 | Parallel & Distributed Computing | CTB1F-06 | 58 | Miss Huma Kashaf Chughtai |
 | 208 | 13 | 2026-11-04 | Wednesday | 9:00 AM?10:30 AM | BS Cyber Security | Morning | 7 | A | CYSE-4151 | Embedded Systems | CTB1F-06 | 58 | Dr. Hira Nazir |

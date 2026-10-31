@@ -14,7 +14,7 @@ The official source PDF used for verification is `Final updated CSET Mid Term Ex
 - `CSET_Mid_Term_Examination_Fall_2026.md`
 - `Final updated CSET Mid Term Examination Fall 2026.pdf`
 - `data/exam_schedule.js`
-- `data/exam_schedule.json`
+- `data/exam_schedule.jsonsa
 - `data/verification_report.json`
 
 The text and Markdown files preserve the original page ordering and document structure so each extracted schedule page can be traced back to the original source.
@@ -35,16 +35,17 @@ The portal works as a static site and does not require a backend or build step.
 
 ## Key Features
 
-- Dashboard with overall statistics across the 413 verified examination records across all 24 pages. The displayed total is derived from the loaded, validated dataset.
-- Complete date sheet with live filtering by date, day, program, semester, section, shift, teacher/invigilator, course code, and room.
-- Teacher date sheets with focused invigilator views.
-- Program-wise schedules with optional semester, section, and shift filtering.
-- Class-wise schedules for specific program, semester, section, and shift combinations.
-- Calendar-based view for chronological exam scheduling.
-- Class-wise print sheets use a white A4 layout, university logo, institutional header, explicit program/semester/section/shift context, and bordered signature blocks.
-- PDF export for filtered complete, teacher-wise, program-wise, and class-wise schedules; class-wise PDFs include the university logo and institutional header.
-- University branding with the Emerson University Multan logo and official institutional title block.
-- Light/dark mode toggle.
+- **Dashboard with Program Directory & Live Status:** Overall statistics across the 413 verified examination records, an embedded real-time paper status tracker, and an interactive "Explore by Degree Program" directory with instant search and 1-click schedule navigation.
+- **Dynamic Cascading Program Navigation:** Program-wise schedules with quick-access program chips and dynamic cascading dropdowns (Program → Semester → Section → Shift) ensuring users only see available options.
+- **Real-Time Live & Upcoming Paper Tracker:** Live ticker widget checking system time against the timetable; highlights exams conducting *right now* with an animated pulsing `● LIVE NOW` indicator, classroom location, invigilator, and elapsed time progress bar, plus countdown clocks for upcoming sessions and a simulation test mode.
+- **Enhanced Classroom & Teacher Display:** Prominently highlights exact classrooms with high-contrast venue badges, and clearly features assigned teachers and invigilators across all tabular, card, calendar, print, and PDF layouts (including class-wise sheets).
+- **Class-Wise Date Sheets:** Focused class schedules for specific program, semester, section, and shift combinations with dynamic cascading selectors and invigilator details.
+- **Complete Date Sheet:** Global searchable and filterable view across all 413 records with multi-attribute filtering.
+- **Teacher Date Sheets:** Dedicated invigilation duty schedules for individual faculty members.
+- **Calendar-Based View:** Chronological date-by-date exam schedules with venue and invigilator indicators.
+- **White A4 Print & PDF Export Consistency:** Clean print view and jsPDF/AutoTable exports with the official Emerson University Multan header, university logo, classroom context, teacher metadata, and styled HOD / Head of Department and Examination Coordinator signature blocks.
+- **University Branding:** Official Emerson University Multan crest and institutional title blocks.
+- **Light / Dark Mode:** Toggleable color themes across the entire portal.
 
 ## Print and PDF Behavior
 
