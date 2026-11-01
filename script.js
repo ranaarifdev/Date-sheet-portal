@@ -2268,58 +2268,110 @@ function aboutContact() {
   app.innerHTML = `
     <section class="about-contact-page" aria-labelledby="about-contact-title">
       <div class="about-contact-intro">
-        <p class="eyebrow">ABOUT THIS PORTAL</p>
-        <h2 id="about-contact-title">About the Developer</h2>
-        <p class="muted">Learn more about the developer and get in touch for questions or feedback.</p>
+        <p class="eyebrow">EMERSON UNIVERSITY MULTAN · DEPARTMENT OF CYBER SECURITY</p>
+        <h2 id="about-contact-title">About the Portal &amp; Developer</h2>
+        <p class="muted">About this examination resource, its developer, and how to get in touch.</p>
       </div>
 
-      <section id="about-section" class="card developer-card" aria-labelledby="developer-name">
-        <div class="developer-heading">
-          <div class="developer-avatar" aria-hidden="true">MA</div>
-          <div>
-            <p class="developer-label">Designed and developed by</p>
-            <h3 id="developer-name">Muhammad Arif</h3>
-            <p class="muted">BS Cyber Security · 7th Semester (Evening)</p>
-          </div>
-        </div>
-        <div class="developer-details">
-          <div class="developer-detail">
-            <span>Degree</span>
-            <strong>BS Cyber Security</strong>
-          </div>
-          <div class="developer-detail">
-            <span>Semester</span>
-            <strong>7th Semester (Evening)</strong>
-          </div>
-          <div class="developer-detail">
-            <span>Session</span>
-            <strong>2023–2027</strong>
-          </div>
-          <div class="developer-detail">
-            <span>Institution</span>
-            <strong>Emerson University Multan</strong>
-          </div>
-          <div class="developer-detail">
-            <span>Department</span>
-            <strong>Department of Cyber Security</strong>
-          </div>
+      <section class="card portal-overview" aria-labelledby="portal-overview-title">
+        <h3 id="portal-overview-title">The Date Sheet Portal</h3>
+        <p>This portal provides students and staff with a clear, accessible way to consult the Fall 2026 Mid-Term Examination schedule. It brings verified examination information together in one place to make schedules easier to find, review, and share.</p>
+        <div class="portal-feature-grid">
+          <div><strong>Verified schedule</strong><span>413 examination records, with examination details retained from the source schedule.</span></div>
+          <div><strong>Useful views</strong><span>Cyber Security day-wise and class-wise schedules, class sheets for programs, teacher duty sheets, and a live tracker.</span></div>
+          <div><strong>Practical tools</strong><span>Search, filters, browser print, PDF preview and download, and PNG timetable downloads.</span></div>
+          <div><strong>Built with</strong><span>HTML, CSS, and vanilla JavaScript, with jsPDF and AutoTable for PDF exports.</span></div>
         </div>
       </section>
 
-      <section id="contact-section" class="card contact-card" aria-labelledby="contact-title">
-        <div class="contact-copy">
+      <div class="about-contact-grid">
+        <section class="card developer-card" aria-labelledby="developer-name">
+          <div class="developer-heading">
+            <div class="developer-avatar" aria-hidden="true">MA</div>
+            <div>
+              <p class="developer-label">Portal Developer</p>
+              <h3 id="developer-name">Muhammad Arif</h3>
+              <p class="muted">BS Cyber Security · 7th Semester (Evening)</p>
+            </div>
+          </div>
+          <p class="developer-description">I developed this examination portal to make verified schedules easier to access and use. My interests include cybersecurity and web development, especially building useful, straightforward digital tools.</p>
+          <div class="developer-details">
+            <div class="developer-detail">
+              <span>Degree</span>
+              <strong>BS Cyber Security</strong>
+            </div>
+            <div class="developer-detail">
+              <span>Semester</span>
+              <strong>7th Semester (Evening)</strong>
+            </div>
+            <div class="developer-detail">
+              <span>Session</span>
+              <strong>2023–2027</strong>
+            </div>
+            <div class="developer-detail">
+              <span>Institution</span>
+              <strong>Emerson University Multan</strong>
+            </div>
+            <div class="developer-detail">
+              <span>Department</span>
+              <strong>Cyber Security</strong>
+            </div>
+            <div class="developer-detail">
+              <span>Role</span>
+              <strong>Portal Developer</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="card contact-card" aria-labelledby="contact-title">
           <p class="eyebrow">GET IN TOUCH</p>
-          <h2 id="contact-title">Contact the Developer</h2>
-          <p class="muted">For questions, corrections, or feedback about the portal.</p>
-          <a class="contact-phone" href="tel:03060830941">03060830941</a>
-        </div>
-        <div class="contact-actions">
-          <a class="contact-action contact-call" href="tel:03060830941">Call Developer</a>
-          <a class="contact-action contact-whatsapp" href="https://wa.me/923060830941" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
-        </div>
-      </section>
+          <h3 id="contact-title">Contact the Developer</h3>
+          <p class="muted">For questions, schedule corrections, or feedback about the portal.</p>
+          <div class="contact-actions">
+            <a class="contact-action contact-call" href="tel:03060830941">Call: 03060830941</a>
+            <a class="contact-action contact-whatsapp" href="https://wa.me/923060830941" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a class="contact-action contact-email" href="mailto:ranaarifnoon66@gmail.com">Email</a>
+          </div>
+
+          <form id="contactEmailForm" class="contact-form">
+            <h4>Send a Message</h4>
+            <div class="contact-form-grid">
+              <div class="field">
+                <label for="contactName">Your Name</label>
+                <input id="contactName" name="name" type="text" autocomplete="name" required>
+              </div>
+              <div class="field">
+                <label for="contactEmail">Your Email</label>
+                <input id="contactEmail" name="email" type="email" autocomplete="email" required>
+              </div>
+              <div class="field contact-form-full">
+                <label for="contactSubject">Subject</label>
+                <input id="contactSubject" name="subject" type="text" required>
+              </div>
+              <div class="field contact-form-full">
+                <label for="contactMessage">Message</label>
+                <textarea id="contactMessage" name="message" rows="5" required></textarea>
+              </div>
+            </div>
+            <button class="primary" type="submit">Send Message</button>
+            <p class="muted contact-form-note">Your default email application will open with your message prepared. You can review and send it there.</p>
+          </form>
+        </section>
+      </div>
     </section>
   `;
+
+  $('#contactEmailForm').onsubmit = event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+    const name = $('#contactName').value.trim();
+    const email = $('#contactEmail').value.trim();
+    const subject = $('#contactSubject').value.trim();
+    const message = $('#contactMessage').value.trim();
+    const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+    window.location.href = `mailto:ranaarifnoon66@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 }
 
 /* ============================================================
@@ -2341,16 +2393,11 @@ function show(v, param = '') {
     program: () => program(param),
     class: () => classView(param),
     instructions: instructionsView,
-    about: aboutContact,
-    contact: aboutContact
+    about: aboutContact
   };
   (views[v] || dashboard)();
   if (v === 'dashboard' || v === 'live') startLiveTicker();
-  if (v === 'contact') {
-    document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 document.querySelectorAll('nav button').forEach(b => {
