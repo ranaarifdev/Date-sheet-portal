@@ -274,16 +274,13 @@ function stripLabelPrefix(value, label) {
 }
 
 function getCurrentPrintRows() {
-  if (view === 'teacher' || view === 'program' || view === 'class' || view === 'calendar') {
+  if (view === 'teacher' || view === 'program' || view === 'class') {
     return [...selected].sort(sortBySchedule);
   }
   if (view === 'live') {
     // Export all data or a filtered subset; selected may be empty from live view
     const rows = selected.length ? selected : [...data];
     return rows.sort(sortBySchedule);
-  }
-  if (view === 'complete') {
-    return filtered().sort(sortBySchedule);
   }
   return [...data].sort(sortBySchedule);
 }
@@ -361,15 +358,6 @@ function getPrintMeta(rows) {
       detail: classDetail,
       classContext: { program: p, semester: s, section: sec, shift },
       subtitle: 'Class-Wise Examination Date Sheet'
-    };
-  }
-  if (view === 'calendar') {
-    return {
-      ...base,
-      sheetType: 'Examination Calendar',
-      detailLabel: 'Calendar Scope',
-      detail: 'Departmental Examination Schedule',
-      subtitle: 'Examination Calendar'
     };
   }
   if (view === 'live') {
@@ -830,15 +818,15 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
   let columnStyles = {};
   if (isDayWise) {
     columnStyles = {
-      0: { cellWidth: 9 },
-      1: { cellWidth: 25 },
-      2: { cellWidth: 17 },
-      3: { cellWidth: 15 },
+      0: { cellWidth: 11 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 14 },
+      3: { cellWidth: 14 },
       4: { cellWidth: 21 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 62 },
-      7: { cellWidth: 70 },
-      8: { cellWidth: 25 }
+      5: { cellWidth: 24 },
+      6: { cellWidth: 67 },
+      7: { cellWidth: 67 },
+      8: { cellWidth: 21 }
     };
   } else if (isClass) {
     columnStyles = {
@@ -1383,95 +1371,6 @@ function live() {
 
 const VIEW_PDF_BTN_HTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>View PDF`;
 
-/* ============================================================
-   FILTER PANEL  (Complete date sheet)
-   ============================================================ */
-function filters() {
-  return `<div class="filters">
-    <div class="field"><label>Search all records</label><input id="f-search" type="search" placeholder="Course, teacher, room, date..."></div>
-    <div class="field"><label>Class Name / Program</label><select id="f-program">${opts(uniq('program'))}</select></div>
-    <div class="field"><label>Semester</label><select id="f-semester">${opts(uniq('semester'))}</select></div>
-    <div class="field"><label>Section</label><select id="f-section">${opts(uniq('section'))}</select></div>
-    <div class="field"><label>Shift</label><select id="f-shift">${opts(uniq('shift'))}</select></div>
-  </div>
-  <div class="toolbar no-print" style="margin-top:14px">
-    <button class="primary" id="apply">Apply filters</button>
-    <button class="secondary" id="reset">Reset filters</button>
-    <button class="secondary" id="print">${VIEW_PDF_BTN_HTML}</button>
-    <button class="secondary" id="pdfDownload">Download PDF</button>
-  </div>`;
-}
-
-function filtered() {
-  return data.filter(r => {
-    const search = ($('#f-search')?.value || '').trim().toLowerCase();
-    if (search) {
-      const teacher = (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available';
-      const searchable = [
-        r.date, r.day, r.startTime, r.endTime, r.program, r.semester, r.section,
-        r.shift, r.courseCode, r.courseTitle, teacher, r.room
-      ].join(' ').toLowerCase();
-      if (!searchable.includes(search)) return false;
-    }
-
-    const fProg = $('#f-program')?.value;
-    if (fProg && r.program !== fProg) return false;
-
-    const fSem = $('#f-semester')?.value;
-    if (fSem && String(r.semester) !== fSem) return false;
-
-    const fSec = $('#f-section')?.value;
-    if (fSec && r.section !== fSec) return false;
-
-    const fShift = $('#f-shift')?.value;
-    if (fShift && r.shift !== fShift) return false;
-
-    return true;
-  }).sort(sortBySchedule);
-}
-
-/* ============================================================
-   VIEW: Complete date sheet
-   ============================================================ */
-function complete() {
-  app.innerHTML = layout(
-    'Complete date sheet',
-    `<p class="muted">Search and filter across all programs in the verified examination schedule. <b id="count">${data.length}</b> records displayed.</p>
-    ${filters()}
-    <div id="results" style="margin-top:18px">${table([...data].sort(sortBySchedule))}</div>`
-  );
-  bindComplete();
-}
-
-function bindComplete() {
-  const render = () => {
-    const res = filtered();
-    $('#results').innerHTML = table(res);
-    $('#count').textContent = res.length;
-  };
-  $('#apply').onclick = render;
-  $('#f-search').oninput = render;
-  $('#reset').onclick = () => {
-    document.querySelectorAll('.filters input, .filters select').forEach(e => { e.value = ''; });
-    render();
-  };
-  $('#print').onclick = () => {
-    const res = filtered();
-    viewPdf(res, {
-      subtitle: 'Complete Examination Date Sheet',
-      detail: `Total records: ${res.length}`
-    }, pdfFilename('Complete_Examination', []));
-  };
-  $('#pdfDownload').onclick = () => {
-    const res = filtered();
-    downloadPdf(
-      res,
-      { subtitle: 'Complete Examination Date Sheet', detail: `Total records: ${res.length}` },
-      pdfFilename('Complete_Examination', [])
-    );
-  };
-}
-
 function selector(label, id, values, empty = 'Select ' + label) {
   return `<div class="field"><label>${label}</label><select id="${id}">${opts(values, empty)}</select></div>`;
 }
@@ -1732,7 +1631,7 @@ function renderProgram() {
 /* ============================================================
    VIEW: Class-wise date sheets (Dynamic Cascading)
    ============================================================ */
-function classView() {
+function classView(initialProgram = '') {
   const allPrograms = uniq('program');
 
   app.innerHTML = layout(
@@ -1754,6 +1653,7 @@ function classView() {
   const sSel = $('#classS');
   const secSel = $('#classSec');
   const shSel = $('#classSh');
+  if (initialProgram) pSel.value = initialProgram;
 
   function updateClassCascade(changed) {
     const p = pSel.value;
@@ -1841,6 +1741,7 @@ function classView() {
 
   shSel.onchange = renderClass;
   $('#classSubmit').onclick = renderClass;
+  if (initialProgram) updateClassCascade('program');
 
   $('#classPrint').onclick = () => {
     if (!selected.length) {
@@ -1875,79 +1776,6 @@ function classView() {
       pdfFilename(safe(p), [`Semester_${s}`, `Section_${sec}`, sh])
     );
   };
-}
-
-/* ============================================================
-   VIEW: Examination calendar
-   ============================================================ */
-function calendar() {
-  const groups = {};
-  const tFilter = $('#calTeacher')?.value || '';
-  const pFilter = $('#calProgram')?.value || '';
-
-  const matched = data.filter(x => {
-    if (tFilter) {
-      const actualTeacher = (x.teacher && x.teacher.trim()) ? x.teacher.trim() : 'Not Available';
-      if (actualTeacher !== tFilter) return false;
-    }
-    if (pFilter && x.program !== pFilter) return false;
-    return true;
-  }).sort(sortBySchedule);
-
-  // Keep selected in sync so print/PDF paths work from calendar view
-  selected = matched;
-
-  matched.forEach(x => {
-    (groups[x.date] ??= []).push(x);
-  });
-
-  const datesSorted = Object.keys(groups).sort();
-
-  app.innerHTML = layout(
-    'Examination calendar',
-    `<div class="toolbar no-print">
-      ${selector('Teacher', 'calTeacher', getTeachers())}
-      ${selector('Program', 'calProgram', uniq('program'))}
-      <button class="primary" id="calApply">Filter calendar</button>
-      <button class="secondary" id="calPrint">${VIEW_PDF_BTN_HTML}</button>
-      <button class="secondary" id="calPdf">Download PDF</button>
-    </div>
-    <div id="calContent" style="margin-top:14px">
-      ${datesSorted.length ? datesSorted.map(d => {
-        const rs = groups[d];
-        const dateObj = new Date(d + 'T00:00:00');
-        const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-        return `<div class="calendar-day">
-          <h3>${formattedDate} · ${rs.length} examination${rs.length === 1 ? '' : 's'}</h3>
-          ${rs.map(x => `<div class="event">
-            <b>${esc(x.startTime)} – ${esc(x.endTime)}<br><small style="color:var(--muted)">Slot ${esc(x.slot)}</small></b>
-            <span><b>${esc(x.courseCode)}: ${esc(x.courseTitle)}</b><br><small>${esc(x.program)} · Sem ${esc(x.semester)} · Sec ${esc(x.section)} · ${esc(x.shift)}</small></span>
-            <span>
-              ${roomBadge(x.room)}<br>
-              <small style="margin-top:4px;display:inline-block">${teacherCell(x.teacher)}</small>
-            </span>
-          </div>`).join('')}
-        </div>`;
-      }).join('') : '<div class="empty">No matching calendar records for the selected filters.</div>'}
-    </div>`
-  );
-
-  if (tFilter && $('#calTeacher')) $('#calTeacher').value = tFilter;
-  if (pFilter && $('#calProgram')) $('#calProgram').value = pFilter;
-
-  $('#calApply').onclick = calendar;
-  $('#calTeacher').onchange = calendar;
-  $('#calProgram').onchange = calendar;
-  $('#calPrint').onclick = () => {
-    viewPdf(matched, {
-      subtitle: 'Examination Calendar',
-      detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
-    }, pdfFilename('Examination_Calendar', [tFilter, pFilter]));
-  };
-  $('#calPdf').onclick = () => downloadPdf(matched, {
-    subtitle: 'Examination Calendar',
-    detail: `${tFilter || 'All teachers'} · ${pFilter || 'All programs'}`
-  }, pdfFilename('Examination_Calendar', [tFilter, pFilter]));
 }
 
 /* ============================================================
@@ -2015,16 +1843,8 @@ function renderProgramCards(filterText = '') {
 }
 
 window.openProgramSheet = function(progName) {
-  if (progName === CYBER_SECURITY_PROGRAM) {
-    show('program');
-    return;
-  }
-  show('complete');
-  const programFilter = $('#f-program');
-  if (programFilter) {
-    programFilter.value = progName;
-    $('#apply')?.click();
-  }
+  if (progName === CYBER_SECURITY_PROGRAM) show('program');
+  else show('class', progName);
 };
 
 window.filterProgramCards = function(val) {
@@ -2060,14 +1880,12 @@ function dashboard() {
     <!-- Quick Navigation Actions -->
     <div class="card" style="margin-top:20px">
       <h3>Quick Actions</h3>
-      <p class="muted">Access complete date sheets, invigilation duties, class timetables, or the chronological calendar.</p>
+      <p class="muted">Access Cyber Security schedules, class timetables, live status, or teacher duty sheets.</p>
       <div class="toolbar">
         <button class="primary" onclick="show('program')">Cyber Security Date Sheets</button>
         <button class="secondary" onclick="show('class')">Class Sheets</button>
         <button class="secondary" onclick="show('live')">⚡ Live Tracker</button>
         <button class="secondary" onclick="show('teacher')">Teacher Duty Sheets</button>
-        <button class="secondary" onclick="show('complete')">Complete Date Sheet</button>
-        <button class="secondary" onclick="show('calendar')">Calendar Schedule</button>
       </div>
     </div>
   `;
@@ -2148,11 +1966,9 @@ function show(v, param = '') {
   const views = {
     dashboard,
     live,
-    complete,
     teacher,
     program: () => program(param),
-    class: classView,
-    calendar,
+    class: () => classView(param),
     about: aboutContact,
     contact: aboutContact
   };
