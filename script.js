@@ -347,7 +347,8 @@ function getPrintMeta(rows) {
     const sec = $('#classSec').value;
     const shift = $('#classSh').value;
     const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift} Shift`;
-    const cyberSecurityProgram = isCyberSecurityProgram(p);
+    const cyberSecurityProgram = isCyberSecurityProgram(p) ||
+      rows.length > 0 && rows.every(isCyberSecurityScheduleRecord);
     return {
       ...base,
       ...(cyberSecurityProgram ? {
@@ -568,6 +569,342 @@ function buildPrintDocument(rows, meta) {
   printDoc.innerHTML = buildPrintHeader(meta) + buildPrintTable(rows, meta) + (meta.isCyberSecurityProgram ? '' : buildSignatureFooter());
   document.body.appendChild(printDoc);
   return printDoc;
+}
+
+function imageColumns(type) {
+  const column = (label, weight, value) => ({ label, weight, value });
+  const details = row => (row.teacher && row.teacher.trim()) ? row.teacher.trim() : 'Not Available';
+  const time = row => `${row.startTime} – ${row.endTime}`;
+  const date = row => formatDate(row.date);
+
+  if (type === 'day') {
+    return [
+      column('Sr.', 4, (row, index) => index + 1),
+      column('Time', 11, time),
+      column('Semester', 5, row => row.semester),
+      column('Section', 5, row => row.section),
+      column('Shift', 8, row => row.shift),
+      column('Course Code', 9, row => row.courseCode || 'N/A'),
+      column('Course Title', 25, row => row.courseTitle || 'N/A'),
+      column('Teacher / Invigilator', 25, details),
+      column('Room', 8, row => row.room || 'N/A')
+    ];
+  }
+  if (type === 'class') {
+    return [
+      column('Sr.', 5, (row, index) => index + 1),
+      column('Date', 11, date),
+      column('Day', 8, row => row.day),
+      column('Time', 11, time),
+      column('Course Code', 10, row => row.courseCode || 'N/A'),
+      column('Course Title', 26, row => row.courseTitle || 'N/A'),
+      column('Teacher / Invigilator', 19, details),
+      column('Room', 10, row => row.room || 'N/A')
+    ];
+  }
+  if (type === 'teacher') {
+    return [
+      column('Sr.', 4, (row, index) => index + 1),
+      column('Date', 10, date),
+      column('Day', 7, row => row.day),
+      column('Time', 10, time),
+      column('Program', 15, row => row.program),
+      column('Sem.', 5, row => row.semester),
+      column('Sec.', 5, row => row.section),
+      column('Shift', 8, row => row.shift),
+      column('Course Code', 10, row => row.courseCode || 'N/A'),
+      column('Course Title', 18, row => row.courseTitle || 'N/A'),
+      column('Room', 8, row => row.room || 'N/A')
+    ];
+  }
+  if (type === 'program') {
+    return [
+      column('Sr.', 4, (row, index) => index + 1),
+      column('Date', 10, date),
+      column('Day', 7, row => row.day),
+      column('Time', 10, time),
+      column('Sem.', 5, row => row.semester),
+      column('Sec.', 5, row => row.section),
+      column('Shift', 8, row => row.shift),
+      column('Course Code', 12, row => row.courseCode || 'N/A'),
+      column('Course Title', 17, row => row.courseTitle || 'N/A'),
+      column('Teacher / Invigilator', 16, details),
+      column('Room', 6, row => row.room || 'N/A')
+    ];
+  }
+  return [
+    column('Date', 9, date),
+    column('Day', 6, row => row.day),
+    column('Start', 7, row => row.startTime),
+    column('End', 7, row => row.endTime),
+    column('Program', 17, row => row.program),
+    column('Sem.', 5, row => row.semester),
+    column('Sec.', 5, row => row.section),
+    column('Shift', 7, row => row.shift),
+    column('Code', 8, row => row.courseCode || 'N/A'),
+    column('Course Title', 15, row => row.courseTitle || 'N/A'),
+    column('Teacher / Invigilator', 10, details),
+    column('Room', 4, row => row.room || 'N/A')
+  ];
+}
+
+function wrapImageText(context, value, maxWidth) {
+  const words = String(value ?? '').replace(/\s+/g, ' ').trim().split(' ');
+  const lines = [];
+  let line = '';
+  words.forEach(word => {
+    if (!word) return;
+    let remaining = word;
+    while (context.measureText(remaining).width > maxWidth) {
+      let splitAt = 1;
+      while (splitAt < remaining.length && context.measureText(remaining.slice(0, splitAt + 1)).width <= maxWidth) splitAt++;
+      if (line) {
+        lines.push(line);
+        line = '';
+      }
+      lines.push(remaining.slice(0, splitAt));
+      remaining = remaining.slice(splitAt);
+    }
+    const candidate = line ? `${line} ${remaining}` : remaining;
+    if (line && context.measureText(candidate).width > maxWidth) {
+      lines.push(line);
+      line = remaining;
+    } else {
+      line = candidate;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.length ? lines : [''];
+}
+
+function createImageTableLayout(rows, columns, width, context) {
+  const columnWidths = columns.map(column => width * column.weight / 100);
+  const lineHeight = 10.5;
+  context.font = 'bold 8px Arial, sans-serif';
+  const headerLines = columns.map((column, index) => wrapImageText(context, column.label, columnWidths[index] - 10));
+  const headerHeight = Math.max(25, ...headerLines.map(lines => lines.length * lineHeight + 10));
+  context.font = '8.5px Arial, sans-serif';
+  const bodyRows = rows.map((row, rowIndex) => {
+    const cells = columns.map((column, index) => {
+      const value = column.value(row, rowIndex);
+      return wrapImageText(context, value == null ? '' : value, columnWidths[index] - 10);
+    });
+    const height = Math.max(23, ...cells.map(lines => lines.length * lineHeight + 10));
+    return { cells, height };
+  });
+  return { columns, columnWidths, headerLines, headerHeight, bodyRows, height: headerHeight + bodyRows.reduce((sum, row) => sum + row.height, 0) };
+}
+
+function drawImageTable(context, layout, left, top, width) {
+  let y = top;
+  let x = left;
+  context.font = 'bold 8px Arial, sans-serif';
+  layout.columns.forEach((column, index) => {
+    const cellWidth = layout.columnWidths[index];
+    context.fillStyle = '#dce8f0';
+    context.fillRect(x, y, cellWidth, layout.headerHeight);
+    context.strokeStyle = '#718096';
+    context.lineWidth = 0.6;
+    context.strokeRect(x, y, cellWidth, layout.headerHeight);
+    context.fillStyle = '#111827';
+    layout.headerLines[index].forEach((line, lineIndex) => {
+      context.fillText(line, x + 5, y + 8 + lineIndex * 10.5, cellWidth - 10);
+    });
+    x += cellWidth;
+  });
+  y += layout.headerHeight;
+
+  layout.bodyRows.forEach((row, rowIndex) => {
+    x = left;
+    row.cells.forEach((lines, columnIndex) => {
+      const cellWidth = layout.columnWidths[columnIndex];
+      context.fillStyle = rowIndex % 2 ? '#f7f9fb' : '#ffffff';
+      context.fillRect(x, y, cellWidth, row.height);
+      context.strokeStyle = '#aeb8c2';
+      context.lineWidth = 0.45;
+      context.strokeRect(x, y, cellWidth, row.height);
+      context.fillStyle = '#111827';
+      context.font = '8.5px Arial, sans-serif';
+      lines.forEach((line, lineIndex) => {
+        context.fillText(line, x + 5, y + 8 + lineIndex * 10.5, cellWidth - 10);
+      });
+      x += cellWidth;
+    });
+    y += row.height;
+  });
+  return y;
+}
+
+function drawImageInstitutionHeader(context, width, logo, meta) {
+  const margin = 32;
+  const logoBox = 76;
+  const logoRatio = logo.naturalWidth / logo.naturalHeight;
+  const logoWidth = logoRatio >= 1 ? logoBox : logoBox * logoRatio;
+  const logoHeight = logoRatio >= 1 ? logoBox / logoRatio : logoBox;
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, width, 116);
+  context.drawImage(logo, margin, 15 + (logoBox - logoHeight) / 2, logoWidth, logoHeight);
+  context.textAlign = 'center';
+  context.fillStyle = '#000000';
+  context.font = 'bold 15px Arial, sans-serif';
+  context.fillText(meta.title || 'EMERSON UNIVERSITY MULTAN', width / 2, 38);
+  context.font = 'bold 11px Arial, sans-serif';
+  context.fillText(meta.department || 'Faculty of Computing & Emerging Technologies', width / 2, 60);
+  context.font = 'bold 10px Arial, sans-serif';
+  context.fillText(meta.heading || 'CSET Mid-Term Examination — Fall 2026', width / 2, 80);
+  context.strokeStyle = '#111827';
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(margin, 108);
+  context.lineTo(width - margin, 108);
+  context.stroke();
+  context.textAlign = 'left';
+}
+
+function drawImageCyberInfo(context, width, meta, group, top) {
+  const margin = 32;
+  const height = 52;
+  context.fillStyle = '#f5f7fa';
+  context.strokeStyle = '#aeb8c2';
+  context.lineWidth = 0.8;
+  context.fillRect(margin, top, width - margin * 2, height);
+  context.strokeRect(margin, top, width - margin * 2, height);
+  context.fillStyle = '#111827';
+  context.font = 'bold 10px Arial, sans-serif';
+  const heading = group ? weekdayScheduleHeading(group.date) : (meta.session || 'Fall 2026');
+  context.fillText(heading, margin + 10, top + 18);
+  context.font = 'bold 9px Arial, sans-serif';
+  context.fillText(meta.programContext || meta.programName || '', margin + 10, top + 38, width / 2 - 25);
+  context.textAlign = 'right';
+  context.font = 'bold 9px Arial, sans-serif';
+  context.fillText(meta.programCoordinator || 'Program Coordinator: Dr. Hira Nazir', width - margin - 10, top + 18);
+  if (group) {
+    context.font = '9px Arial, sans-serif';
+    context.fillText(`Date: ${formatLongDate(group.date)}    Day: ${group.day}`, width - margin - 10, top + 38);
+  }
+  context.textAlign = 'left';
+  return top + height + 8;
+}
+
+function loadImageElement(image) {
+  return new Promise((resolve, reject) => {
+    if (!image) {
+      reject(new Error('The university logo is not available.'));
+      return;
+    }
+    if (image.complete) {
+      if (image.naturalWidth > 0) resolve(image);
+      else reject(new Error('The university logo could not be loaded.'));
+      return;
+    }
+    image.addEventListener('load', () => resolve(image), { once: true });
+    image.addEventListener('error', () => reject(new Error('The university logo could not be loaded.')), { once: true });
+  });
+}
+
+async function createScheduleImage(rows, meta, sourceView) {
+  const logo = await loadImageElement(document.querySelector('.logo'));
+  const layoutType = sourceView === 'dashboard' ? 'complete' : sourceView;
+  const isDayWise = layoutType === 'program' && meta.isDayWise;
+  const width = layoutType === 'class' ? 794 : 1120;
+  const margin = 32;
+  const tableWidth = width - margin * 2;
+  const measureCanvas = document.createElement('canvas');
+  const measureContext = measureCanvas.getContext('2d');
+  if (!measureContext) throw new Error('The browser could not measure timetable text.');
+  const groups = isDayWise
+    ? dateDayGroups(rows).map(group => ({ ...group, layout: createImageTableLayout(group.rows, imageColumns('day'), tableWidth, measureContext) }))
+    : [{ rows, layout: createImageTableLayout(rows, imageColumns(layoutType), tableWidth, measureContext) }];
+  const cyberSecurity = !!meta.isCyberSecurityProgram;
+  const topContentHeight = cyberSecurity
+    ? isDayWise ? groups.length * (60 + 12) : 64
+    : 95;
+  const totalHeight = 116 + topContentHeight + groups.reduce((sum, group) => sum + 24 + group.layout.height, 0) + 32;
+  const scale = Math.min(1.5, 32000 / totalHeight);
+  if (scale < 1) throw new Error('The selected timetable is too long to render as one high-resolution image.');
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.ceil(width * scale);
+  canvas.height = Math.ceil(totalHeight * scale);
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('The browser could not create an image canvas.');
+  context.scale(scale, scale);
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, width, totalHeight);
+  drawImageInstitutionHeader(context, width, logo, meta);
+
+  let y = 116;
+  if (!cyberSecurity) {
+    context.fillStyle = '#f5f7fa';
+    context.strokeStyle = '#aeb8c2';
+    context.lineWidth = 0.8;
+    context.fillRect(margin, y, tableWidth, 62);
+    context.strokeRect(margin, y, tableWidth, 62);
+    context.fillStyle = '#111827';
+    context.font = 'bold 10px Arial, sans-serif';
+    context.fillText('Date Sheet Details', margin + 10, y + 16);
+    context.font = '8.5px Arial, sans-serif';
+    context.fillText(`Type: ${meta.sheetType || 'Examination Date Sheet'}`, margin + 10, y + 34, tableWidth / 2 - 16);
+    context.fillText(`${meta.detailLabel || 'Selection'}: ${meta.detail || 'Complete Examination Date Sheet'}`, margin + 10, y + 50, tableWidth / 2 - 16);
+    context.fillText(`Papers: ${rows.length}`, margin + tableWidth / 2, y + 34);
+    y += 72;
+    if (meta.subtitle) {
+      context.textAlign = 'center';
+      context.font = 'bold 12px Arial, sans-serif';
+      context.fillText(meta.subtitle, width / 2, y + 12);
+      context.textAlign = 'left';
+      y += 24;
+    }
+  }
+
+  for (const group of groups) {
+    if (cyberSecurity) {
+      y = drawImageCyberInfo(context, width, meta, isDayWise ? group : null, y + 4);
+    } else {
+      context.strokeStyle = '#b4b4b4';
+      context.beginPath();
+      context.moveTo(margin, y);
+      context.lineTo(width - margin, y);
+      context.stroke();
+      y += 8;
+    }
+    y = drawImageTable(context, group.layout, margin, y, tableWidth) + 16;
+  }
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (blob) resolve(blob);
+      else reject(new Error('The browser could not encode the timetable image.'));
+    }, 'image/png');
+  });
+}
+
+async function downloadScheduleImage(rows, metaOverride = {}, filename = 'Date-Sheet.png') {
+  if (!rows || !rows.length) {
+    alert('No records selected. Please make a selection first.');
+    return;
+  }
+  try {
+    const sourceView = view;
+    const meta = { ...getPrintMeta(rows), ...metaOverride, totalPapers: rows.length };
+    const blob = await createScheduleImage(rows, meta, sourceView);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    console.error('Date sheet PNG export failed:', error);
+    alert(`Could not generate the timetable image. ${error.message || 'Please try again.'}`);
+  }
+}
+
+function imageFilename(prefix, parts = []) {
+  const details = parts.filter(Boolean).map(part => safe(String(part)).replace(/_/g, '-'));
+  return `${[prefix, ...details].join('-')}.png`;
 }
 
 /* Open browser print dialog */
@@ -1278,6 +1615,7 @@ function teacher() {
       <button class="primary" id="viewTeacher">View schedule</button>
       <button class="secondary" id="teacherPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="teacherPdf">Download PDF</button>
+      <button class="secondary" id="teacherImage">Download Image (PNG)</button>
     </div>
     <div id="teacherResult" style="margin-top:18px"></div>`
   );
@@ -1309,6 +1647,18 @@ function teacher() {
         detail: `Teacher / Invigilator: ${teacherName}`
       },
       pdfFilename('Teacher', [teacherName])
+    );
+  };
+  $('#teacherImage').onclick = () => {
+    if (!selected.length) {
+      alert('Please select a teacher first.');
+      return;
+    }
+    const teacherName = $('#teacherSelect').value;
+    downloadScheduleImage(
+      selected,
+      { subtitle: 'Teacher-Wise Examination Date Sheet', detail: `Teacher / Invigilator: ${teacherName}` },
+      imageFilename('Teacher-Wise', [teacherName])
     );
   };
 }
@@ -1344,6 +1694,7 @@ function program() {
       <button class="primary" id="programView">View date sheet</button>
       <button class="secondary" id="programPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="programPdf">Download PDF</button>
+      <button class="secondary" id="programImage">Download Image (PNG)</button>
     </div>
     <div id="programResult" style="margin-top:18px"></div>`
   );
@@ -1442,6 +1793,25 @@ function program() {
     );
   };
 
+  $('#programImage').onclick = () => {
+    if (!selected.length) {
+      alert('No Cyber Security records match the selected filters.');
+      return;
+    }
+    const isDayWise = !!activeProgramDate;
+    downloadScheduleImage(
+      selected,
+      { subtitle: 'Cyber Security Date Sheet' },
+      isDayWise
+        ? imageFilename('Cyber-Security-Day-Wise', [formatDate(activeProgramDate)])
+        : imageFilename('Cyber-Security-Class-Wise', [
+          $('#programSem').value && `Semester-${$('#programSem').value}`,
+          $('#programSec').value && `Section-${$('#programSec').value}`,
+          $('#programShift').value
+        ])
+    );
+  };
+
   // Initial trigger
   updateCascade('init');
 }
@@ -1536,6 +1906,7 @@ function classView(initialProgram = '') {
       <button class="primary" id="classSubmit">View class sheet</button>
       <button class="secondary" id="classPrint">${VIEW_PDF_BTN_HTML}</button>
       <button class="secondary" id="classPdf" title="Download selected class as PDF">Download PDF</button>
+      <button class="secondary" id="classImage">Download Image (PNG)</button>
     </div>
     <div id="classResult" style="margin-top:18px"></div>`
   );
@@ -1667,6 +2038,22 @@ function classView(initialProgram = '') {
       pdfFilename(safe(p), [`Semester_${s}`, `Section_${sec}`, sh])
     );
   };
+
+  $('#classImage').onclick = () => {
+    if (!selected.length) {
+      alert('Please select all four class attributes first.');
+      return;
+    }
+    const p = pSel.value;
+    const s = sSel.value;
+    const sec = secSel.value;
+    const sh = shSel.value;
+    downloadScheduleImage(
+      selected,
+      { subtitle: 'Class-Wise Examination Date Sheet', detail: `${p} · Semester ${s} · Section ${sec} · ${sh} Shift` },
+      imageFilename(isCyberSecurityProgram(p) || selected.every(isCyberSecurityScheduleRecord) ? 'Cyber-Security-Class-Wise' : 'Class-Wise', [p, `Semester-${s}`, `Section-${sec}`, sh])
+    );
+  };
 }
 
 /* ============================================================
@@ -1777,11 +2164,25 @@ function dashboard() {
         <button class="secondary" onclick="show('class')">Class Sheets</button>
         <button class="secondary" onclick="show('live')">⚡ Live Tracker</button>
         <button class="secondary" onclick="show('teacher')">Teacher Duty Sheets</button>
+        <button class="secondary" id="completeImage">Download Complete Date Sheet Image (PNG)</button>
       </div>
     </div>
   `;
 
   renderLiveTrackerWidget($('#liveWidgetContainer'));
+  $('#completeImage').onclick = () => {
+    const rows = [...data].sort(sortBySchedule);
+    downloadScheduleImage(
+      rows,
+      {
+        sheetType: 'Complete Examination Date Sheet',
+        subtitle: 'Complete Examination Date Sheet',
+        detailLabel: 'Selection',
+        detail: 'Complete Examination Date Sheet'
+      },
+      imageFilename('Complete-Date-Sheet')
+    );
+  };
 
   app.insertAdjacentHTML('beforeend', `
     <section class="card exam-notice" aria-labelledby="examNoticeTitle">
