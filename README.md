@@ -64,6 +64,8 @@ The generated document includes:
 - repeated column headers on multi-page output where possible
 - official departmental footer and page numbering
 - a single, clear institutional header and correct page numbering in downloaded PDFs
+- program day filters group examinations by their source date and weekday; each day-wise table uses the same nine columns in screen, print, and PDF output
+- Cyber Security program sheets use Department of Cyber Security branding and identify Program Coordinator Dr. Hira Nazir without generic sheet-type labels
 
 ## Data Integrity and Verification
 

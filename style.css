@@ -624,6 +624,139 @@ footer {
   padding: 20px;
   font-size: 12px;
 }
+.about-contact-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.about-contact-intro {
+  margin-bottom: 18px;
+}
+.about-contact-intro .eyebrow,
+.contact-copy .eyebrow {
+  margin: 0 0 6px;
+  color: var(--blue);
+}
+.about-contact-intro h2,
+.contact-copy h2 {
+  margin-bottom: 6px;
+}
+.about-contact-intro > p:last-child,
+.contact-copy > p {
+  margin-top: 0;
+}
+.developer-card {
+  padding: clamp(20px, 4vw, 32px);
+}
+.developer-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.developer-avatar {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--blue), #147a9b);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+.developer-label {
+  margin: 0 0 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.developer-heading h3 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+.developer-heading .muted {
+  margin: 0;
+}
+.developer-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  padding-top: 20px;
+}
+.developer-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bg);
+}
+.developer-detail span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.developer-detail strong {
+  overflow-wrap: anywhere;
+}
+.contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 4vw, 30px);
+  border-top: 3px solid var(--cyan);
+  scroll-margin-top: 18px;
+}
+.contact-phone {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.contact-phone:hover {
+  text-decoration: underline;
+}
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.contact-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: filter .15s ease, transform .15s ease;
+}
+.contact-action:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.contact-call {
+  background: var(--blue);
+}
+.contact-whatsapp {
+  background: #168a54;
+}
 @media (max-width: 700px) {
   .hero { padding: 24px; }
   .top { padding: 0 16px; }
@@ -631,6 +764,14 @@ footer {
   .brand small { font-size: 10px; }
   .event { grid-template-columns: 1fr; }
   .card { padding: 15px; }
+  .developer-heading { align-items: flex-start; gap: 13px; }
+  .developer-avatar { width: 56px; height: 56px; flex-basis: 56px; border-radius: 14px; }
+  .developer-heading h3 { font-size: 19px; }
+  .developer-details { grid-template-columns: 1fr; gap: 9px; padding-top: 16px; }
+  .contact-card { align-items: stretch; flex-direction: column; gap: 18px; }
+  .contact-actions { display: grid; grid-template-columns: 1fr; }
+  .cyber-security-info-box { grid-template-columns: 1fr; }
+  .cyber-security-info-right { align-items: flex-start; text-align: left; }
   /* Live tracker mobile */
   .active-exams-grid { grid-template-columns: 1fr !important; }
   .live-topbar { flex-direction: column; align-items: stretch; }
@@ -869,6 +1010,109 @@ footer {
   font-size: 8.5pt;
   border: 0;
   margin-top: 10px;
+}
+
+.daywise-date-group {
+  margin: 16px 0;
+}
+.daywise-date-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 8px;
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--ink);
+}
+.daywise-date-heading span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.cyber-security-info-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px 20px;
+  margin: 8px 0 10px;
+  padding: 10px 14px;
+  border: 1px solid #cbd5df;
+  border-radius: 5px;
+  background: #f5f7fa;
+  color: #12233b;
+  font-size: 15px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cyber-security-info-left,
+.cyber-security-info-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+.cyber-security-info-right {
+  align-items: flex-end;
+  text-align: right;
+}
+.cyber-security-info-box strong {
+  font-weight: 700;
+}
+.cyber-security-info-box span {
+  line-height: 1.35;
+}
+.daywise-table {
+  min-width: 930px;
+}
+.cyber-security-print .daywise-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+.cyber-security-print .daywise-table th:nth-child(1),
+.cyber-security-print .daywise-table td:nth-child(1) { width: 5%; }
+.cyber-security-print .daywise-table th:nth-child(2),
+.cyber-security-print .daywise-table td:nth-child(2) { width: 12%; }
+.cyber-security-print .daywise-table th:nth-child(3),
+.cyber-security-print .daywise-table td:nth-child(3) { width: 8%; }
+.cyber-security-print .daywise-table th:nth-child(4),
+.cyber-security-print .daywise-table td:nth-child(4) { width: 7%; }
+.cyber-security-print .daywise-table th:nth-child(5),
+.cyber-security-print .daywise-table td:nth-child(5) { width: 9%; }
+.cyber-security-print .daywise-table th:nth-child(6),
+.cyber-security-print .daywise-table td:nth-child(6) { width: 10%; }
+.cyber-security-print .daywise-table th:nth-child(7),
+.cyber-security-print .daywise-table td:nth-child(7) { width: 20%; }
+.cyber-security-print .daywise-table th:nth-child(8),
+.cyber-security-print .daywise-table td:nth-child(8) { width: 19%; }
+.cyber-security-print .daywise-table th:nth-child(9),
+.cyber-security-print .daywise-table td:nth-child(9) { width: 10%; }
+.cyber-security-print .print-header {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid #000;
+  color: #000;
+}
+.cyber-security-print .print-department,
+.cyber-security-print .print-heading,
+.cyber-security-print .print-title {
+  color: #000;
+}
+.cyber-security-print .print-department {
+  font-size: 15px;
+  font-weight: 800;
+}
+.cyber-security-print .print-heading {
+  font-size: 12px;
+  font-weight: 700;
+}
+.cyber-security-print .print-context-line {
+  margin-top: 5px;
+  color: #000;
+  font-size: 10pt;
+}
+.cyber-security-print .print-subheading {
+  margin-top: 3px;
+  color: #222;
 }
 
 .print-table th, .print-table td {
@@ -1124,11 +1368,103 @@ footer {
     text-align: right !important;
   }
 
+  .cyber-security-print .print-brand-row {
+    gap: 10px;
+  }
+  .cyber-security-print .print-header {
+    display: block !important;
+    margin-bottom: 6pt;
+    padding-bottom: 5pt;
+  }
+  .cyber-security-print .print-title {
+    font-size: 16pt;
+  }
+  .cyber-security-print .print-department {
+    font-size: 11pt;
+    font-weight: 800;
+  }
+  .cyber-security-print .print-heading {
+    margin-top: 4pt;
+    font-size: 10.5pt;
+    font-weight: 700;
+  }
+  .cyber-security-print .print-subheading {
+    font-size: 9pt;
+  }
+  .cyber-security-print .print-context-line {
+    margin-top: 3pt;
+    font-size: 9.5pt;
+  }
+  .cyber-security-print .daywise-date-group {
+    margin: 7pt 0 10pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .cyber-security-print .daywise-date-heading {
+    margin: 0 0 5pt;
+    font-size: 10pt;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .cyber-security-print .daywise-date-heading span {
+    font-size: 9pt;
+  }
+  .cyber-security-print .cyber-security-info-box {
+    margin: 5pt 0 7pt;
+    padding: 6pt 9pt;
+    border: 0.75pt solid #aeb8c2 !important;
+    border-radius: 3pt;
+    background: #f5f7fa !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 4pt 12pt;
+    font-size: calc(9pt + 2px);
+  }
+  .cyber-security-print .cyber-security-info-right {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .cyber-security-print .daywise-table {
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 7.5pt;
+  }
+  .cyber-security-print .daywise-table th,
+  .cyber-security-print .daywise-table td {
+    padding: 5pt 4pt;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+  .cyber-security-print .daywise-table th {
+    font-size: 7pt;
+  }
+  .cyber-security-print .daywise-table th:nth-child(1),
+  .cyber-security-print .daywise-table td:nth-child(1) { width: 5%; }
+  .cyber-security-print .daywise-table th:nth-child(2),
+  .cyber-security-print .daywise-table td:nth-child(2) { width: 12%; }
+  .cyber-security-print .daywise-table th:nth-child(3),
+  .cyber-security-print .daywise-table td:nth-child(3) { width: 8%; }
+  .cyber-security-print .daywise-table th:nth-child(4),
+  .cyber-security-print .daywise-table td:nth-child(4) { width: 7%; }
+  .cyber-security-print .daywise-table th:nth-child(5),
+  .cyber-security-print .daywise-table td:nth-child(5) { width: 9%; }
+  .cyber-security-print .daywise-table th:nth-child(6),
+  .cyber-security-print .daywise-table td:nth-child(6) { width: 10%; }
+  .cyber-security-print .daywise-table th:nth-child(7),
+  .cyber-security-print .daywise-table td:nth-child(7) { width: 20%; }
+  .cyber-security-print .daywise-table th:nth-child(8),
+  .cyber-security-print .daywise-table td:nth-child(8) { width: 19%; }
+  .cyber-security-print .daywise-table th:nth-child(9),
+  .cyber-security-print .daywise-table td:nth-child(9) { width: 10%; }
+  .cyber-security-print .print-footer {
+    display: none !important;
+  }
+
   .print-secondary {
     color: #444 !important;
   }
 
   .print-header {
+    display: block !important;
     border-bottom: 1.5pt solid #000 !important;
     color: #000 !important;
   }
@@ -1218,7 +1554,7 @@ footer {
 
   .top, nav, .hero, footer, .no-print,
   .toolbar, .filters, .field, button, select, input, #theme,
-  .day-chip-container, #programDayChipsBar,
+  .day-chip-container, #programDateChipsBar,
   .modal-overlay, #pdf-preview-modal {
     display: none !important;
   }

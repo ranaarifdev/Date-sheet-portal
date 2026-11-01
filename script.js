@@ -7,8 +7,7 @@ let liveTickerInterval = null;
 let simulationMode = 'real';
 let simulatedTime = null;
 let currentLiveProgFilter = '';
-let activeProgramTab = '';
-let activeProgramDay = ''; // day-wise filter for Program Sheets view
+let activeProgramDate = ''; // selected date in Cyber Security program sheets
 
 // Keep malformed extraction artifacts out of every view, export, and print path.
 const NUMERIC_FILLER = /^\s*1[\s1]*$/;
@@ -53,6 +52,95 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric'
   });
+}
+
+function formatLongDate(value) {
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'long', year: 'numeric'
+  });
+}
+
+function weekdayScheduleHeading(value) {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return 'EXAMINATION SCHEDULE';
+  return `${date.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()} EXAMINATION SCHEDULE`;
+}
+
+const CYBER_SECURITY_PROGRAM = 'BS Cyber Security';
+
+function isCyberSecurityProgram(programName) {
+  return /cyber\s+security/i.test(String(programName || ''));
+}
+
+function dateDayGroups(rows) {
+  const groups = new Map();
+  [...rows].sort(sortBySchedule).forEach(row => {
+    const key = `${row.date}|${row.day || ''}`;
+    if (!groups.has(key)) {
+      groups.set(key, { date: row.date, day: row.day || '', rows: [] });
+    }
+    groups.get(key).rows.push(row);
+  });
+  return [...groups.values()];
+}
+
+const DAY_WISE_COLUMNS = [
+  ['semester', 'Semester'],
+  ['section', 'Section'],
+  ['shift', 'Shift'],
+  ['courseCode', 'Course Code'],
+  ['courseTitle', 'Course Title'],
+  ['teacher', 'Teacher / Invigilator'],
+  ['room', 'Room']
+];
+
+function buildDayWiseTable(rows, printMode = false) {
+  const tableClass = printMode ? 'print-table daywise-table' : 'daywise-table';
+  return `<div class="table-wrap daywise-table-wrap"><table class="${tableClass}">
+    <thead><tr><th>Sr.</th><th>Time</th>${DAY_WISE_COLUMNS.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map((row, index) => `<tr>
+      <td>${index + 1}</td>
+      <td>${esc(row.startTime)} – ${esc(row.endTime)}</td>
+      ${DAY_WISE_COLUMNS.map(([field]) => {
+        const value = field === 'teacher'
+          ? ((row.teacher && row.teacher.trim()) ? row.teacher.trim() : 'Not Available')
+          : (row[field] ?? '');
+        return `<td>${esc(field === 'courseTitle' ? decodeHtml(value) : value)}</td>`;
+      }).join('')}
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function buildCyberSecurityInfoBox({ session = 'Fall 2026', program = '', programCoordinator = 'Program Coordinator: Dr. Hira Nazir', date = '', day = '' } = {}) {
+  return `<div class="cyber-security-info-box">
+    <div class="cyber-security-info-left">
+      <strong>${esc(date ? weekdayScheduleHeading(date) : session)}</strong>
+      <strong>${esc(program)}</strong>
+    </div>
+    <div class="cyber-security-info-right">
+      <strong>${esc(programCoordinator)}</strong>
+      ${date && day ? `<span><b>Date:</b> ${esc(formatLongDate(date))} <b>Day:</b> ${esc(day)}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function buildDayWiseGroups(rows, printMode = false, meta = {}) {
+  const programName = meta.programContext || meta.programName || CYBER_SECURITY_PROGRAM;
+  const isCyberSecurity = meta.isCyberSecurityProgram ?? isCyberSecurityProgram(programName);
+  return dateDayGroups(rows).map(group => {
+    const dateHeading = `<h3 class="daywise-date-heading"><span>Date:</span> ${esc(formatLongDate(group.date))}<span>Day:</span> ${esc(group.day)}</h3>`;
+    const header = isCyberSecurity
+      ? buildCyberSecurityInfoBox({
+        session: meta.session || 'Fall 2026',
+        program: programName,
+        programCoordinator: meta.programCoordinator,
+        date: group.date,
+        day: group.day
+      })
+      : dateHeading;
+    return `<section class="daywise-date-group">${header}${buildDayWiseTable(group.rows, printMode)}</section>`;
+  }).join('');
 }
 
 function periodForRows(rows, fallback = 'Examination period: 28 October 2026 to 6 November 2026') {
@@ -226,8 +314,8 @@ function getPrintMeta(rows) {
       subtitle: 'Teacher-Wise Examination Date Sheet'
     };
   }
-  if (view === 'program' && $('#programSelect')?.value) {
-    const p = $('#programSelect').value;
+  if (view === 'program') {
+    const p = CYBER_SECURITY_PROGRAM;
     const sem = $('#programSem')?.value;
     const sec = $('#programSec')?.value;
     const shift = $('#programShift')?.value;
@@ -235,13 +323,20 @@ function getPrintMeta(rows) {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
-    if (activeProgramDay) detail += ` · ${activeProgramDay}`;
+    if (activeProgramDate) detail += ` · ${formatDate(activeProgramDate)}`;
     return {
       ...base,
-      sheetType: 'Program-Wise Date Sheet',
+      department: 'Department of Cyber Security',
+      heading: 'Mid-Term Examination — Fall 2026',
+      programCoordinator: 'Program Coordinator: Dr. Hira Nazir',
+      programName: p,
+      programContext: [p, sem && `Semester ${sem}`, sec && `Section ${sec}`, shift].filter(Boolean).join(' · '),
+      isCyberSecurityProgram: true,
+      isDayWise: !!activeProgramDate,
+      sheetType: 'Cyber Security Date Sheet',
       detailLabel: 'Program Details',
       detail,
-      subtitle: 'Program-Wise Examination Date Sheet'
+      subtitle: 'Cyber Security Date Sheet'
     };
   }
   if (view === 'class' && $('#classP')?.value) {
@@ -250,8 +345,17 @@ function getPrintMeta(rows) {
     const sec = $('#classSec').value;
     const shift = $('#classSh').value;
     const classDetail = `${p} · Semester ${s} · Section ${sec} · ${shift} Shift`;
+    const cyberSecurityProgram = isCyberSecurityProgram(p);
     return {
       ...base,
+      ...(cyberSecurityProgram ? {
+        department: 'Department of Cyber Security',
+        heading: 'Mid-Term Examination — Fall 2026',
+        programName: p,
+        programContext: classDetail,
+        programCoordinator: 'Program Coordinator: Dr. Hira Nazir',
+        isCyberSecurityProgram: true
+      } : {}),
       sheetType: 'Class-Wise Date Sheet',
       detailLabel: 'Class Details',
       detail: classDetail,
@@ -285,11 +389,28 @@ function getPrintMeta(rows) {
 }
 
 function buildPrintHeader(meta) {
+  if (meta.isCyberSecurityProgram) {
+    return `<div class="print-header cyber-security-print-header">
+      <div class="print-brand-row">
+        <img class="print-logo" src="university-logo.jpeg" alt="University Logo" />
+        <div class="print-titles">
+          <div class="print-title">${esc(meta.title)}</div>
+          <div class="print-department">${esc(meta.department)}</div>
+          <div class="print-heading">${esc(meta.heading)}</div>
+        </div>
+      </div>
+      ${meta.isDayWise ? '' : buildCyberSecurityInfoBox({
+        session: meta.session,
+        program: meta.programContext || meta.programName,
+        programCoordinator: meta.programCoordinator
+      })}
+      <div class="print-divider"></div>
+    </div>`;
+  }
+
   const rawDetail = meta.detail || meta.subtitle || 'Complete Examination Date Sheet';
   const cleanDetail = stripLabelPrefix(rawDetail, meta.detailLabel || '');
   const classContext = meta.classContext;
-  const courseCoordinatorText = 'Course Coordinator: Dr Hira Nazir';
-  const departmentText = 'Department of Cyber Security';
 
   const details = [
     ['Date Sheet Type', meta.sheetType || meta.subtitle || 'Examination Date Sheet'],
@@ -319,16 +440,12 @@ function buildPrintHeader(meta) {
     <div class="print-details">
       <div class="print-detail-grid">${detailHtml}</div>
     </div>
-    <div class="print-meta">
-      <div class="print-meta-left"><strong>${esc(courseCoordinatorText)}</strong></div>
-      <div class="print-meta-right"><strong>${esc(departmentText)}</strong></div>
-    </div>
     <div class="print-divider"></div>
   </div>`;
 }
 
 /* Build the print-ready HTML table */
-function buildPrintTable(rows) {
+function buildPrintTable(rows, meta = {}) {
   if (!rows.length) {
     return '<div class="print-empty">No matching records available for printing.</div>';
   }
@@ -337,6 +454,9 @@ function buildPrintTable(rows) {
   const isClassSheet = view === 'class';
   const isProgramSheet = view === 'program';
 
+  if (isProgramSheet && meta.isDayWise) {
+    return buildDayWiseGroups(rows, true, meta);
+  }
   if (isClassSheet) {
     return `<table class="print-table class-print-table">
       <thead><tr>
@@ -451,8 +571,8 @@ function buildPrintDocument(rows, meta) {
 
   const printDoc = document.createElement('div');
   printDoc.id = 'printDocument';
-  printDoc.className = `print-sheet${view === 'class' ? ' class-print-sheet' : ''}`;
-  printDoc.innerHTML = buildPrintHeader(meta) + buildPrintTable(rows) + buildSignatureFooter();
+  printDoc.className = `print-sheet${view === 'class' ? ' class-print-sheet' : ''}${meta.isCyberSecurityProgram ? ' cyber-security-print' : ''}`;
+  printDoc.innerHTML = buildPrintHeader(meta) + buildPrintTable(rows, meta) + (meta.isCyberSecurityProgram ? '' : buildSignatureFooter());
   document.body.appendChild(printDoc);
   return printDoc;
 }
@@ -487,6 +607,8 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
   const isTeacher = view === 'teacher';
   const isClass = view === 'class';
   const isProgram = view === 'program';
+  const isCyberSecurity = !!resolvedMeta.isCyberSecurityProgram;
+  const isDayWise = !!resolvedMeta.isDayWise;
   const logoImage = document.querySelector('.logo');
 
   const orientation = isClass ? 'portrait' : 'landscape';
@@ -502,14 +624,13 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
   const semLbl  = resolvedMeta.semesterLabel || resolvedMeta.session || 'Fall 2026';
   const subtitle = resolvedMeta.subtitle || resolvedMeta.sheetType || 'Examination Date Sheet';
   const detail  = resolvedMeta.detail   || '';
-  const period  = resolvedMeta.period   || periodForRows(rows);
-  const genDate = `Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`;
   const sessionLabel = resolvedMeta.session || semLbl || 'Fall 2026';
   const detailLabel = resolvedMeta.detailLabel || 'Relevant Details';
   const scopeValue = resolvedMeta.detail || detail || subtitle || 'Complete Examination Date Sheet';
   const totalLabel = String(rows.length);
   const classContext = resolvedMeta.classContext;
 
+  let currentDayGroup = null;
   const drawPageHeader = () => {
     doc.setTextColor(0, 0, 0);
     if (logoImage && logoImage.complete && logoImage.naturalWidth) {
@@ -522,15 +643,47 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
     doc.text(title, cx, 14, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.5);
+    doc.setFont('helvetica', isCyberSecurity ? 'bold' : 'normal');
+    doc.setFontSize(isCyberSecurity ? 11.5 : 9.5);
     doc.text(dept, cx, 20, { align: 'center' });
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11.5);
+    doc.setFont('helvetica', isCyberSecurity ? 'normal' : 'bold');
+    doc.setFontSize(isCyberSecurity ? 9.5 : 11.5);
     doc.text(heading.replace('—', '-'), cx, 26, { align: 'center' });
+
+    if (isCyberSecurity) {
+      const boxY = 34;
+      const boxHeight = isDayWise ? 23 : 17;
+      doc.setFillColor(245, 248, 251);
+      doc.setDrawColor(180);
+      doc.setLineWidth(0.25);
+      doc.roundedRect(margin, boxY, usableW, boxHeight, 1, 1, 'FD');
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.text(isDayWise && currentDayGroup ? weekdayScheduleHeading(currentDayGroup.date) : sessionLabel, margin + 5, boxY + 7);
+      doc.text(resolvedMeta.programContext || resolvedMeta.programName || '', margin + 5, boxY + 14);
+      doc.setFontSize(10);
+      doc.text(resolvedMeta.programCoordinator || 'Program Coordinator: Dr. Hira Nazir', pageW - margin - 5, boxY + 7, { align: 'right' });
+      if (isDayWise && currentDayGroup) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Date: ${formatLongDate(currentDayGroup.date)}    Day: ${currentDayGroup.day}`, pageW - margin - 5, boxY + 15, { align: 'right' });
+      }
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.4);
+      doc.line(margin, boxY + boxHeight + 3, pageW - margin, boxY + boxHeight + 3);
+      return;
+    }
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.text(sessionLabel, cx, 32, { align: 'center' });
+
+    if (isDayWise && currentDayGroup) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text(`Date: ${formatDate(currentDayGroup.date)}    Day: ${currentDayGroup.day}`, cx, 38, { align: 'center' });
+    }
 
     let ruleY = 36;
     if (classContext) {
@@ -540,6 +693,8 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
       const contextLines = doc.splitTextToSize(contextLine, usableW);
       doc.text(contextLines, cx, 38, { align: 'center' });
       ruleY = 38 + (contextLines.length * 4);
+    } else if (isDayWise && currentDayGroup) {
+      ruleY = 42;
     }
 
     doc.setDrawColor(0);
@@ -547,49 +702,45 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     doc.line(margin, ruleY, pageW - margin, ruleY);
   };
 
-  let y = classContext ? 48 : 42;
+  let y = isDayWise ? (isCyberSecurity ? 63 : 45) : (isCyberSecurity ? 57 : classContext ? 48 : 42);
 
-  doc.setFillColor(245, 248, 251);
-  doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'F');
-  doc.setDrawColor(180);
-  doc.setLineWidth(0.2);
-  doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'S');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
-  doc.text('Date Sheet Details', margin + 5, y + 6.5);
-
-  const detailItems = [
-    `Type: ${resolvedMeta.sheetType || subtitle || 'Examination Date Sheet'}`,
-    ...(classContext ? [] : [`${detailLabel}: ${stripLabelPrefix(scopeValue || '', detailLabel || '')}`]),
-    `Papers: ${totalLabel}`
-  ];
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.4);
-  detailItems.forEach((item, idx) => {
-    const x = margin + 5 + (idx % 2) * (usableW / 2.1);
-    const yy = y + 11 + (idx >= 2 ? 5 : 0);
-    doc.text(item, x, yy);
-  });
-  y += 24;
-
-  if (!classContext) {
-    doc.setFontSize(10.5);
+  if (!isCyberSecurity) {
+    doc.setFillColor(245, 248, 251);
+    doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'F');
+    doc.setDrawColor(180);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(margin, y, usableW, 18, 1.5, 1.5, 'S');
     doc.setFont('helvetica', 'bold');
-    doc.text(subtitle, cx, y, { align: 'center' }); y += 5.5;
+    doc.setFontSize(8.5);
+    doc.text('Date Sheet Details', margin + 5, y + 6.5);
 
-    if (detail) {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9.5);
-      doc.text(detail, cx, y, { align: 'center' }); y += 5;
+    const detailItems = [
+      `Type: ${resolvedMeta.sheetType || subtitle || 'Examination Date Sheet'}`,
+      ...(classContext ? [] : [`${detailLabel}: ${stripLabelPrefix(scopeValue || '', detailLabel || '')}`]),
+      `Papers: ${totalLabel}`
+    ];
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.4);
+    detailItems.forEach((item, idx) => {
+      const x = margin + 5 + (idx % 2) * (usableW / 2.1);
+      const yy = y + 11 + (idx >= 2 ? 5 : 0);
+      doc.text(item, x, yy);
+    });
+    y += 24;
+
+    if (!classContext) {
+      doc.setFontSize(10.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(subtitle, cx, y, { align: 'center' }); y += 5.5;
+
+      if (detail) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.text(detail, cx, y, { align: 'center' }); y += 5;
+      }
     }
   }
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.setTextColor(0, 0, 0);
-  doc.text('Course Coordinator: Dr Hira Nazir', margin, y);
-  doc.text('Department of Cyber Security', pageW - margin, y, { align: 'right' }); y += 5;
 
   doc.setDrawColor(180);
   doc.setLineWidth(0.3);
@@ -598,7 +749,20 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
   // Table definition per view type
   let head, body;
 
-  if (isClass) {
+  if (isDayWise) {
+    head = [['Sr.', 'Time', 'Semester', 'Section', 'Shift', 'Course Code', 'Course Title', 'Teacher / Invigilator', 'Room']];
+    body = rows.map((r, i) => [
+      i + 1,
+      `${r.startTime} – ${r.endTime}`,
+      r.semester || '',
+      r.section || '',
+      r.shift || '',
+      r.courseCode || 'N/A',
+      decodeHtml(r.courseTitle || 'N/A'),
+      (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available',
+      r.room || 'N/A'
+    ]);
+  } else if (isClass) {
     head = [['Sr.', 'Date', 'Day', 'Time', 'Course Code', 'Course Title', 'Teacher / Invigilator', 'Room']];
     body = rows.map((r, i) => [
       i + 1,
@@ -658,11 +822,25 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     ]);
   }
 
-  const pageFooterLeft = 'Emerson University Multan - FCET';
+  const pageFooterLeft = isCyberSecurity
+    ? 'Emerson University Multan - Department of Cyber Security'
+    : 'Emerson University Multan - FCET';
 
   // Build column styles for better layout control
   let columnStyles = {};
-  if (isClass) {
+  if (isDayWise) {
+    columnStyles = {
+      0: { cellWidth: 9 },
+      1: { cellWidth: 25 },
+      2: { cellWidth: 17 },
+      3: { cellWidth: 15 },
+      4: { cellWidth: 21 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 62 },
+      7: { cellWidth: 70 },
+      8: { cellWidth: 25 }
+    };
+  } else if (isClass) {
     columnStyles = {
       0: { cellWidth: 8 },
       1: { cellWidth: 22 },
@@ -718,15 +896,16 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     };
   }
 
-  doc.autoTable({
+  const autoTableOptions = (tableHead, tableBody) => ({
     startY: y,
-    margin: { top: classContext ? 48 : 42, right: margin, bottom: 14, left: margin },
-    head,
-    body,
+    margin: { top: isDayWise ? (isCyberSecurity ? 66 : 45) : isCyberSecurity ? 60 : classContext ? 48 : 42, right: margin, bottom: 14, left: margin },
+    head: tableHead,
+    body: tableBody,
     theme: 'grid',
+    tableWidth: isDayWise ? usableW : 'auto',
     showHead: 'everyPage',
     styles: {
-      fontSize: isClass ? 8.5 : 7.5,
+      fontSize: isDayWise ? 8.3 : isClass ? 8.5 : 7.5,
       cellPadding: { top: 2, right: 2.5, bottom: 2, left: 2.5 },
       textColor: [0, 0, 0],
       overflow: 'linebreak',
@@ -736,14 +915,33 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
       fillColor: [220, 232, 240],
       textColor: [0, 0, 0],
       fontStyle: 'bold',
-      fontSize: isClass ? 8 : 7
+      fontSize: isDayWise ? 7.8 : isClass ? 8 : 7
     },
     columnStyles,
     rowPageBreak: 'avoid',
-    didDrawPage: () => {
-      drawPageHeader();
-    }
+    didDrawPage: drawPageHeader
   });
+
+  if (isDayWise) {
+    dateDayGroups(rows).forEach((group, index) => {
+      if (index > 0) doc.addPage();
+      currentDayGroup = group;
+      const groupBody = group.rows.map((r, i) => [
+        i + 1,
+        `${r.startTime} – ${r.endTime}`,
+        r.semester || '',
+        r.section || '',
+        r.shift || '',
+        r.courseCode || 'N/A',
+        decodeHtml(r.courseTitle || 'N/A'),
+        (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available',
+        r.room || 'N/A'
+      ]);
+      doc.autoTable(autoTableOptions(head, groupBody));
+    });
+  } else {
+    doc.autoTable(autoTableOptions(head, body));
+  }
 
   const totalPages = doc.internal.getNumberOfPages();
   for (let pg = 1; pg <= totalPages; pg++) {
@@ -1190,15 +1388,11 @@ const VIEW_PDF_BTN_HTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill=
    ============================================================ */
 function filters() {
   return `<div class="filters">
-    <div class="field"><label>Date</label><input id="f-date" type="date"></div>
-    <div class="field"><label>Day</label><select id="f-day">${opts(uniq('day'))}</select></div>
-    <div class="field"><label>Program</label><select id="f-program">${opts(uniq('program'))}</select></div>
+    <div class="field"><label>Search all records</label><input id="f-search" type="search" placeholder="Course, teacher, room, date..."></div>
+    <div class="field"><label>Class Name / Program</label><select id="f-program">${opts(uniq('program'))}</select></div>
     <div class="field"><label>Semester</label><select id="f-semester">${opts(uniq('semester'))}</select></div>
     <div class="field"><label>Section</label><select id="f-section">${opts(uniq('section'))}</select></div>
     <div class="field"><label>Shift</label><select id="f-shift">${opts(uniq('shift'))}</select></div>
-    <div class="field"><label>Teacher</label><select id="f-teacher">${opts(getTeachers())}</select></div>
-    <div class="field"><label>Course Code</label><select id="f-courseCode">${opts(uniq('courseCode'))}</select></div>
-    <div class="field"><label>Room</label><select id="f-room">${opts(uniq('room'))}</select></div>
   </div>
   <div class="toolbar no-print" style="margin-top:14px">
     <button class="primary" id="apply">Apply filters</button>
@@ -1210,11 +1404,15 @@ function filters() {
 
 function filtered() {
   return data.filter(r => {
-    const fDate = $('#f-date')?.value;
-    if (fDate && r.date !== fDate) return false;
-
-    const fDay = $('#f-day')?.value;
-    if (fDay && r.day !== fDay) return false;
+    const search = ($('#f-search')?.value || '').trim().toLowerCase();
+    if (search) {
+      const teacher = (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available';
+      const searchable = [
+        r.date, r.day, r.startTime, r.endTime, r.program, r.semester, r.section,
+        r.shift, r.courseCode, r.courseTitle, teacher, r.room
+      ].join(' ').toLowerCase();
+      if (!searchable.includes(search)) return false;
+    }
 
     const fProg = $('#f-program')?.value;
     if (fProg && r.program !== fProg) return false;
@@ -1228,18 +1426,6 @@ function filtered() {
     const fShift = $('#f-shift')?.value;
     if (fShift && r.shift !== fShift) return false;
 
-    const fTeacher = $('#f-teacher')?.value;
-    if (fTeacher) {
-      const t = (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available';
-      if (t !== fTeacher) return false;
-    }
-
-    const fCode = $('#f-courseCode')?.value;
-    if (fCode && r.courseCode !== fCode) return false;
-
-    const fRoom = $('#f-room')?.value;
-    if (fRoom && r.room !== fRoom) return false;
-
     return true;
   }).sort(sortBySchedule);
 }
@@ -1250,7 +1436,7 @@ function filtered() {
 function complete() {
   app.innerHTML = layout(
     'Complete date sheet',
-    `<p class="muted">Search and filter across the verified CSET examination schedule. <b id="count">${data.length}</b> records displayed.</p>
+    `<p class="muted">Search and filter across all programs in the verified examination schedule. <b id="count">${data.length}</b> records displayed.</p>
     ${filters()}
     <div id="results" style="margin-top:18px">${table([...data].sort(sortBySchedule))}</div>`
   );
@@ -1264,6 +1450,7 @@ function bindComplete() {
     $('#count').textContent = res.length;
   };
   $('#apply').onclick = render;
+  $('#f-search').oninput = render;
   $('#reset').onclick = () => {
     document.querySelectorAll('.filters input, .filters select').forEach(e => { e.value = ''; });
     render();
@@ -1352,36 +1539,15 @@ function renderTeacher() {
 }
 
 /* ============================================================
-   VIEW: Program-wise date sheets (Dynamic Cascading)
+   VIEW: Cyber Security date sheets (Dynamic Cascading)
    ============================================================ */
-const MAJOR_PROGRAMS = [
-  'BS Cyber Security',
-  'BS Data Science',
-  'BS Computer Science',
-  'BS Software Engineering',
-  'BS Artificial Intelligence',
-  'BS Information Technology'
-];
-
-function program(targetProgram = '') {
-  const allPrograms = uniq('program');
-  const initialProg = targetProgram || activeProgramTab || (allPrograms.includes('BS Cyber Security') ? 'BS Cyber Security' : allPrograms[0] || '');
-  activeProgramTab = initialProg;
-
-  const chipsHtml = `
-    <div class="chip-container">
-      ${allPrograms.map(p => `
-        <button class="chip-btn${p === initialProg ? ' active' : ''}" onclick="selectProgramChip('${esc(p)}')">${esc(p)}</button>
-      `).join('')}
-    </div>
-  `;
+function program() {
+  const initialProg = CYBER_SECURITY_PROGRAM;
 
   app.innerHTML = layout(
-    'Program-wise date sheets',
-    `<p class="muted">Select a degree program to generate its comprehensive timetable. The semester, section, and shift selectors automatically adapt to show only available options.</p>
-    ${chipsHtml}
+    'Cyber Security Date Sheets',
+    `<p class="muted">View BS Cyber Security schedules by semester, section, and shift. Choose a date to create a day-wise sheet.</p>
     <div class="toolbar">
-      ${selector('Program', 'programSelect', allPrograms)}
       ${selector('Semester', 'programSem', [])}
       ${selector('Section', 'programSec', [])}
       ${selector('Shift', 'programShift', [])}
@@ -1392,18 +1558,13 @@ function program(targetProgram = '') {
     <div id="programResult" style="margin-top:18px"></div>`
   );
 
-  const progSelect = $('#programSelect');
   const semSelect = $('#programSem');
   const secSelect = $('#programSec');
   const shiftSelect = $('#programShift');
 
-  if (initialProg && progSelect) {
-    progSelect.value = initialProg;
-  }
-
   // Dynamic cascading updates
   function updateCascade(changedLevel) {
-    const p = progSelect.value;
+    const p = initialProg;
     let pRecords = data.filter(x => x.program === p);
 
     // Update Semesters
@@ -1430,28 +1591,16 @@ function program(targetProgram = '') {
     renderProgram();
   }
 
-  progSelect.onchange = () => {
-    activeProgramTab = progSelect.value;
-    activeProgramDay = ''; // reset day filter when program changes
-    document.querySelectorAll('.chip-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.textContent.trim() === progSelect.value);
-    });
-    semSelect.value = '';
-    secSelect.value = '';
-    shiftSelect.value = '';
-    updateCascade('program');
-  };
-
   semSelect.onchange = () => {
     secSelect.value = '';
     shiftSelect.value = '';
-    activeProgramDay = ''; // reset day filter when semester changes
+    activeProgramDate = '';
     updateCascade('semester');
   };
 
   secSelect.onchange = () => {
     shiftSelect.value = '';
-    activeProgramDay = ''; // reset day filter when section changes
+    activeProgramDate = '';
     updateCascade('section');
   };
 
@@ -1463,10 +1612,10 @@ function program(targetProgram = '') {
 
   $('#programPrint').onclick = () => {
     if (!selected.length) {
-      alert('Please select a program first.');
+      alert('No Cyber Security records match the selected filters.');
       return;
     }
-    const p = $('#programSelect').value;
+    const p = initialProg;
     const sem = $('#programSem').value;
     const sec = $('#programSec').value;
     const shift = $('#programShift').value;
@@ -1474,20 +1623,20 @@ function program(targetProgram = '') {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
-    if (activeProgramDay) detail += ` · ${activeProgramDay}`;
+    if (activeProgramDate) detail += ` · ${formatDate(activeProgramDate)}`;
     viewPdf(
       selected,
-      { subtitle: 'Program-Wise Examination Date Sheet', detail },
-      pdfFilename('Program', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift, activeProgramDay])
+      { subtitle: 'Cyber Security Date Sheet', detail },
+      pdfFilename('Cyber_Security', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift, activeProgramDate])
     );
   };
 
   $('#programPdf').onclick = () => {
     if (!selected.length) {
-      alert('Please select a program first.');
+      alert('No Cyber Security records match the selected filters.');
       return;
     }
-    const p = $('#programSelect').value;
+    const p = initialProg;
     const sem = $('#programSem').value;
     const sec = $('#programSec').value;
     const shift = $('#programShift').value;
@@ -1495,11 +1644,11 @@ function program(targetProgram = '') {
     if (sem) detail += ` · Semester ${sem}`;
     if (sec) detail += ` · Section ${sec}`;
     if (shift) detail += ` · ${shift}`;
-    if (activeProgramDay) detail += ` · ${activeProgramDay}`;
+    if (activeProgramDate) detail += ` · ${formatDate(activeProgramDate)}`;
     downloadPdf(
       selected,
-      { subtitle: 'Program-Wise Examination Date Sheet', detail },
-      pdfFilename('Program', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift, activeProgramDay])
+      { subtitle: 'Cyber Security Date Sheet', detail },
+      pdfFilename('Cyber_Security', [p, sem ? `Sem_${sem}` : '', sec ? `Sec_${sec}` : '', shift, activeProgramDate])
     );
   };
 
@@ -1507,48 +1656,34 @@ function program(targetProgram = '') {
   updateCascade('init');
 }
 
-window.selectProgramChip = function(progName) {
-  const progSelect = $('#programSelect');
-  if (progSelect) {
-    progSelect.value = progName;
-    progSelect.dispatchEvent(new Event('change'));
-  }
-};
-
 /* ============================================================
-   DAY-WISE FILTER HELPERS (Program Sheets)
+   DATE FILTER HELPERS (Cyber Security Sheets)
    ============================================================ */
-const ALL_DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-function buildDayChips(availableDays, selectedDay) {
-  const sorted = [...availableDays].sort((a, b) => ALL_DAYS_ORDER.indexOf(a) - ALL_DAYS_ORDER.indexOf(b));
+function buildDateChips(availableDates, selectedDate) {
+  const sorted = [...availableDates].sort((a, b) => a.localeCompare(b));
   if (!sorted.length) return '';
-  return `<div class="day-chip-container no-print" id="programDayChipsBar">
-    <span class="day-chip-label">Filter by Day:</span>
-    <button class="chip-btn${!selectedDay ? ' active' : ''}" onclick="setProgDayFilter('')">All Days</button>
-    ${sorted.map(d => `<button class="chip-btn${d === selectedDay ? ' active' : ''}" onclick="setProgDayFilter('${esc(d)}')">${esc(d)}</button>`).join('')}
+  return `<div class="day-chip-container no-print" id="programDateChipsBar">
+    <span class="day-chip-label">Filter by Date:</span>
+    <button class="chip-btn${!selectedDate ? ' active' : ''}" onclick="setProgramDateFilter('')">All Dates</button>
+    ${sorted.map(date => {
+      const exam = data.find(row => row.date === date && row.program === CYBER_SECURITY_PROGRAM);
+      return `<button class="chip-btn${date === selectedDate ? ' active' : ''}" onclick="setProgramDateFilter('${esc(date)}')">${esc(formatLongDate(date))}${exam?.day ? ` · ${esc(exam.day)}` : ''}</button>`;
+    }).join('')}
   </div>`;
 }
 
-window.setProgDayFilter = function(day) {
-  activeProgramDay = day;
+window.setProgramDateFilter = function(date) {
+  activeProgramDate = date;
   renderProgram();
 };
 
 function renderProgram() {
-  const p = $('#programSelect')?.value;
-  if (!p) {
-    selected = [];
-    const dayChipsEl = document.getElementById('programDayChipsBar');
-    if (dayChipsEl) dayChipsEl.outerHTML = '';
-    $('#programResult').innerHTML = '<div class="empty">Please select a degree program to continue.</div>';
-    return;
-  }
+  const p = CYBER_SECURITY_PROGRAM;
   const sem = $('#programSem')?.value;
   const sec = $('#programSec')?.value;
   const shift = $('#programShift')?.value;
 
-  // Base filtered set (pre day-filter) — used for deriving available days
+  // Base filtered set before the date filter, used to derive available dates.
   const baseFiltered = data.filter(x => {
     if (x.program !== p) return false;
     if (sem && String(x.semester) !== sem) return false;
@@ -1557,23 +1692,21 @@ function renderProgram() {
     return true;
   });
 
-  // Available days derived from the base (pre day-filter) records
-  const availableDays = [...new Set(baseFiltered.map(x => x.day).filter(Boolean))];
+  // Derive date choices from the class-filtered Cyber Security records.
+  const availableDates = [...new Set(baseFiltered.map(x => x.date).filter(Boolean))];
 
-  // If the active day filter is no longer valid (program changed), reset it
-  if (activeProgramDay && !availableDays.includes(activeProgramDay)) {
-    activeProgramDay = '';
+  if (activeProgramDate && !availableDates.includes(activeProgramDate)) {
+    activeProgramDate = '';
   }
 
-  // Apply day filter on top
+  // Apply the selected date after the class filters.
   selected = baseFiltered.filter(x => {
-    if (activeProgramDay && x.day !== activeProgramDay) return false;
+    if (activeProgramDate && x.date !== activeProgramDate) return false;
     return true;
   }).sort(sortBySchedule);
 
-  // Inject or update the day chips bar (between toolbar and result)
-  const existingChipsBar = document.getElementById('programDayChipsBar');
-  const chipsHtml = buildDayChips(availableDays, activeProgramDay);
+  const existingChipsBar = document.getElementById('programDateChipsBar');
+  const chipsHtml = buildDateChips(availableDates, activeProgramDate);
   const resultDiv = $('#programResult');
   if (existingChipsBar) {
     existingChipsBar.outerHTML = chipsHtml || '';
@@ -1581,13 +1714,19 @@ function renderProgram() {
     resultDiv.insertAdjacentHTML('beforebegin', chipsHtml);
   }
 
-  let subtitle = esc(p);
-  if (sem) subtitle += ` · Semester ${esc(sem)}`;
-  if (sec) subtitle += ` · Section ${esc(sec)}`;
-  if (shift) subtitle += ` · ${esc(shift)}`;
-  if (activeProgramDay) subtitle += ` · ${esc(activeProgramDay)}`;
-
-  resultDiv.innerHTML = `<h3>${subtitle} · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>${table(selected, 'program')}`;
+  const resultHeading = `<h3>Department of Cyber Security · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>`;
+  const programContext = [p, sem && `Semester ${sem}`, sec && `Section ${sec}`, shift].filter(Boolean).join(' · ');
+  const printMeta = {
+    isCyberSecurityProgram: true,
+    programName: p,
+    programContext,
+    programCoordinator: 'Program Coordinator: Dr. Hira Nazir'
+  };
+  const dayTables = activeProgramDate ? buildDayWiseGroups(selected, false, printMeta) : '';
+  const cyberInfo = !activeProgramDate
+    ? buildCyberSecurityInfoBox({ session: 'Fall 2026', program: programContext })
+    : '';
+  resultDiv.innerHTML = `${resultHeading}${activeProgramDate ? dayTables : `${cyberInfo}${table(selected, 'program')}`}`;
 }
 
 /* ============================================================
@@ -1674,7 +1813,12 @@ function classView() {
       return;
     }
 
-    $('#classResult').innerHTML = `<h3>${esc(p)} · Semester ${esc(s)} · Section ${esc(sec)} · ${esc(sh)} · ${selected.length} papers</h3>${table(selected, 'class')}`;
+    const cyberMeta = isCyberSecurityProgram(p) ? buildCyberSecurityInfoBox({
+      session: 'Fall 2026',
+      program: `${p} · Semester ${s} · Section ${sec} · ${sh} Shift`,
+      programCoordinator: 'Program Coordinator: Dr. Hira Nazir'
+    }) : '';
+    $('#classResult').innerHTML = `${isCyberSecurityProgram(p) ? '<h3>Department of Cyber Security</h3>' : ''}${cyberMeta}<h3>${esc(p)} · Semester ${esc(s)} · Section ${esc(sec)} · ${esc(sh)} · ${selected.length} papers</h3>${table(selected, 'class')}`;
   };
 
   pSel.onchange = () => {
@@ -1871,10 +2015,16 @@ function renderProgramCards(filterText = '') {
 }
 
 window.openProgramSheet = function(progName) {
-  show('program');
-  setTimeout(() => {
-    selectProgramChip(progName);
-  }, 10);
+  if (progName === CYBER_SECURITY_PROGRAM) {
+    show('program');
+    return;
+  }
+  show('complete');
+  const programFilter = $('#f-program');
+  if (programFilter) {
+    programFilter.value = progName;
+    $('#apply')?.click();
+  }
 };
 
 window.filterProgramCards = function(val) {
@@ -1912,7 +2062,7 @@ function dashboard() {
       <h3>Quick Actions</h3>
       <p class="muted">Access complete date sheets, invigilation duties, class timetables, or the chronological calendar.</p>
       <div class="toolbar">
-        <button class="primary" onclick="show('program')">Browse Program Sheets</button>
+        <button class="primary" onclick="show('program')">Cyber Security Date Sheets</button>
         <button class="secondary" onclick="show('class')">Class Sheets</button>
         <button class="secondary" onclick="show('live')">⚡ Live Tracker</button>
         <button class="secondary" onclick="show('teacher')">Teacher Duty Sheets</button>
@@ -1923,6 +2073,64 @@ function dashboard() {
   `;
 
   renderLiveTrackerWidget($('#liveWidgetContainer'), false);
+}
+
+function aboutContact() {
+  app.innerHTML = `
+    <section class="about-contact-page" aria-labelledby="about-contact-title">
+      <div class="about-contact-intro">
+        <p class="eyebrow">ABOUT THIS PORTAL</p>
+        <h2 id="about-contact-title">About the Developer</h2>
+        <p class="muted">Learn more about the developer and get in touch for questions or feedback.</p>
+      </div>
+
+      <section id="about-section" class="card developer-card" aria-labelledby="developer-name">
+        <div class="developer-heading">
+          <div class="developer-avatar" aria-hidden="true">MA</div>
+          <div>
+            <p class="developer-label">Designed and developed by</p>
+            <h3 id="developer-name">Muhammad Arif</h3>
+            <p class="muted">BS Cyber Security · 7th Semester (Evening)</p>
+          </div>
+        </div>
+        <div class="developer-details">
+          <div class="developer-detail">
+            <span>Degree</span>
+            <strong>BS Cyber Security</strong>
+          </div>
+          <div class="developer-detail">
+            <span>Semester</span>
+            <strong>7th Semester (Evening)</strong>
+          </div>
+          <div class="developer-detail">
+            <span>Session</span>
+            <strong>2023–2027</strong>
+          </div>
+          <div class="developer-detail">
+            <span>Institution</span>
+            <strong>Emerson University Multan</strong>
+          </div>
+          <div class="developer-detail">
+            <span>Department</span>
+            <strong>Department of Cyber Security</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact-section" class="card contact-card" aria-labelledby="contact-title">
+        <div class="contact-copy">
+          <p class="eyebrow">GET IN TOUCH</p>
+          <h2 id="contact-title">Contact the Developer</h2>
+          <p class="muted">For questions, corrections, or feedback about the portal.</p>
+          <a class="contact-phone" href="tel:03060830941">03060830941</a>
+        </div>
+        <div class="contact-actions">
+          <a class="contact-action contact-call" href="tel:03060830941">Call Developer</a>
+          <a class="contact-action contact-whatsapp" href="https://wa.me/923060830941" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+        </div>
+      </section>
+    </section>
+  `;
 }
 
 /* ============================================================
@@ -1944,10 +2152,16 @@ function show(v, param = '') {
     teacher,
     program: () => program(param),
     class: classView,
-    calendar
+    calendar,
+    about: aboutContact,
+    contact: aboutContact
   };
   (views[v] || dashboard)();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (v === 'contact') {
+    document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 document.querySelectorAll('nav button').forEach(b => {
