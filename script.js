@@ -70,6 +70,14 @@ function isCyberSecurityProgram(programName) {
   return /cyber\s+security/i.test(String(programName || ''));
 }
 
+function isCyberSecurityScheduleRecord(record) {
+  return isCyberSecurityProgram(record.program) ||
+    (record.programCode === 'BSCS_SPECIALIZATION' &&
+      String(record.semester) === '1' &&
+      record.section === 'CYB-A' &&
+      record.shift === 'Evening');
+}
+
 function dateDayGroups(rows) {
   const groups = new Map();
   [...rows].sort(sortBySchedule).forEach(row => {
@@ -1113,7 +1121,7 @@ function getLiveScheduleStatus(now) {
   const completed = [];
   const nowMs = now.getTime();
 
-  data.filter(record => isCyberSecurityProgram(record.program)).forEach(r => {
+  data.filter(isCyberSecurityScheduleRecord).forEach(r => {
     const start = parseExamDateTime(r.date, r.startTime);
     const end = parseExamDateTime(r.date, r.endTime);
     if (!start || !end) return;
@@ -1347,7 +1355,7 @@ function program() {
   // Dynamic cascading updates
   function updateCascade(changedLevel) {
     const p = initialProg;
-    let pRecords = data.filter(x => x.program === p);
+    let pRecords = data.filter(isCyberSecurityScheduleRecord);
 
     // Update Semesters
     const sems = uniq('semester', pRecords);
@@ -1448,7 +1456,7 @@ function buildDateChips(availableDates, selectedDate) {
     <span class="day-chip-label">Filter by Date:</span>
     <button class="chip-btn${!selectedDate ? ' active' : ''}" onclick="setProgramDateFilter('')">All Dates</button>
     ${sorted.map(date => {
-      const exam = data.find(row => row.date === date && row.program === CYBER_SECURITY_PROGRAM);
+      const exam = data.find(row => row.date === date && isCyberSecurityScheduleRecord(row));
       return `<button class="chip-btn${date === selectedDate ? ' active' : ''}" onclick="setProgramDateFilter('${esc(date)}')">${esc(formatLongDate(date))}${exam?.day ? ` · ${esc(exam.day)}` : ''}</button>`;
     }).join('')}
   </div>`;
@@ -1467,7 +1475,7 @@ function renderProgram() {
 
   // Base filtered set before the date filter, used to derive available dates.
   const baseFiltered = data.filter(x => {
-    if (x.program !== p) return false;
+    if (!isCyberSecurityScheduleRecord(x)) return false;
     if (sem && String(x.semester) !== sem) return false;
     if (sec && x.section !== sec) return false;
     if (shift && x.shift !== shift) return false;
