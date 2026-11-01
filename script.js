@@ -287,17 +287,15 @@ function getPrintMeta(rows) {
 function buildPrintHeader(meta) {
   const rawDetail = meta.detail || meta.subtitle || 'Complete Examination Date Sheet';
   const cleanDetail = stripLabelPrefix(rawDetail, meta.detailLabel || '');
-  const cleanGeneratedOn = stripLabelPrefix(meta.generatedOn || 'Generated: —', 'Generated');
-  const cleanPeriod = (meta.period || '').replace(/^Examination period:\s*/i, '');
   const classContext = meta.classContext;
+  const courseCoordinatorText = 'Course Coordinator: Dr Hira Nazir';
+  const departmentText = 'Department of Cyber Security';
 
   const details = [
     ['Date Sheet Type', meta.sheetType || meta.subtitle || 'Examination Date Sheet'],
     [meta.detailLabel || 'Selection', cleanDetail],
-    ['Examination Period', cleanPeriod],
     ['Total Papers', String(meta.totalPapers ?? 0)],
-    ['Session', meta.session || 'Fall 2026'],
-    ['Date Generated', cleanGeneratedOn]
+    ['Session', meta.session || 'Fall 2026']
   ].filter(([label]) => !(classContext && label === meta.detailLabel));
 
   const detailHtml = details.map(([label, value]) => `
@@ -309,7 +307,7 @@ function buildPrintHeader(meta) {
 
   return `<div class="print-header">
     <div class="print-brand-row">
-      <img class="print-logo" src="university logo .png" alt="University Logo" />
+      <img class="print-logo" src="university-logo.jpeg" alt="University Logo" />
       <div class="print-titles">
         <div class="print-title">${esc(meta.title)}</div>
         <div class="print-department">${esc(meta.department)}</div>
@@ -320,6 +318,10 @@ function buildPrintHeader(meta) {
     <div class="print-divider"></div>
     <div class="print-details">
       <div class="print-detail-grid">${detailHtml}</div>
+    </div>
+    <div class="print-meta">
+      <div class="print-meta-left"><strong>${esc(courseCoordinatorText)}</strong></div>
+      <div class="print-meta-right"><strong>${esc(departmentText)}</strong></div>
     </div>
     <div class="print-divider"></div>
   </div>`;
@@ -512,7 +514,7 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     doc.setTextColor(0, 0, 0);
     if (logoImage && logoImage.complete && logoImage.naturalWidth) {
       try {
-        doc.addImage(logoImage, 'PNG', margin, 7, 20, 20);
+        doc.addImage(logoImage, 'JPEG', margin, 7, 24, 24);
       } catch (err) {
         // Fallback without logo
       }
@@ -559,8 +561,7 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
   const detailItems = [
     `Type: ${resolvedMeta.sheetType || subtitle || 'Examination Date Sheet'}`,
     ...(classContext ? [] : [`${detailLabel}: ${stripLabelPrefix(scopeValue || '', detailLabel || '')}`]),
-    `Papers: ${totalLabel}`,
-    `Generated: ${stripLabelPrefix(genDate || '', 'Generated')}`
+    `Papers: ${totalLabel}`
   ];
 
   doc.setFont('helvetica', 'normal');
@@ -584,11 +585,11 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     }
   }
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  doc.setTextColor(60, 60, 60);
-  doc.text(period.replace(/[–—]/g, '-'), margin, y);
-  doc.text(genDate, pageW - margin, y, { align: 'right' }); y += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Course Coordinator: Dr Hira Nazir', margin, y);
+  doc.text('Department of Cyber Security', pageW - margin, y, { align: 'right' }); y += 5;
 
   doc.setDrawColor(180);
   doc.setLineWidth(0.3);

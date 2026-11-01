@@ -678,9 +678,9 @@ footer {
 
 .print-logo {
   display: block;
-  width: 72px;
-  height: 72px;
-  flex: 0 0 72px;
+  width: 132px;
+  height: 132px;
+  flex: 0 0 132px;
   object-fit: contain;
 }
 
@@ -770,15 +770,43 @@ footer {
 .print-detail-item span {
   color: #9fc2d7;
   text-transform: uppercase;
-  font-size: 7.5px;
+  font-size: 8.5px;
   letter-spacing: .08em;
   font-weight: 700;
 }
 
 .print-detail-item strong {
-  font-size: 11px;
+  font-size: 14px;
   color: #e9eff5;
   line-height: 1.4;
+  font-weight: 800;
+}
+
+.print-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  color: #000;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.print-meta-left,
+.print-meta-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.print-meta-right {
+  text-align: right;
+}
+
+.print-meta strong {
+  font-size: 12px;
+  font-weight: 900;
+  color: #000;
 }
 
 .print-sheet-heading {
@@ -798,11 +826,28 @@ footer {
 .print-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   margin-top: 14px;
-  font-size: 9.5pt;
-  font-weight: 600;
-  color: #8a9eaf;
+  font-size: 11px;
+  font-weight: 800;
+  color: #000;
+}
+
+.print-meta-left,
+.print-meta-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.print-meta-right {
+  text-align: right;
+}
+
+.print-meta strong {
+  font-size: 12px;
+  font-weight: 900;
+  color: #000;
 }
 
 .print-secondary {
@@ -982,9 +1027,9 @@ footer {
   }
 
   .print-logo {
-    width: 64px;
-    height: 64px;
-    flex-basis: 64px;
+    width: 132px;
+    height: 132px;
+    flex-basis: 132px;
   }
 
   .print-titles {
@@ -1055,8 +1100,28 @@ footer {
   }
 
   .print-meta {
-    font-size: 9pt;
-    color: #333 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 12pt !important;
+    font-size: 10.2pt !important;
+    color: #000 !important;
+    font-weight: 800 !important;
+  }
+
+  .print-meta strong {
+    font-size: 10.8pt !important;
+    color: #000 !important;
+    font-weight: 900 !important;
+  }
+
+  .print-meta-left,
+  .print-meta-right {
+    flex: 1 !important;
+  }
+
+  .print-meta-right {
+    text-align: right !important;
   }
 
   .print-secondary {
@@ -1464,4 +1529,3 @@ body.modal-open {
     height: 65vh;
   }
 }
-
