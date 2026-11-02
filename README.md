@@ -73,6 +73,8 @@ The data set is based on the extracted schedule records and has been checked aga
 
 The final PDF contains one source-level weekday/date inconsistency: record `exam-321` is printed as `Friday, 29 Oct 2026`, although 29 October 2026 is Thursday. The PDF's printed weekday is preserved and the discrepancy is documented in the verification report.
 
+The source labels the eight Semester 1, Section CYB-A, Evening records as `BSCS_SPECIALIZATION`. The website normalizes this class to **BS Cyber Security (BSCYB)** at runtime so it is available consistently in the Cyber Security and class-wise schedules; the extracted source files remain unchanged. The BS Cyber Security date-sheet view excludes the separate MS Cyber Security records.
+
 At runtime, records with an empty required value (`date`, `courseCode`, `courseTitle`, or `room`) or numeric extraction filler matching `/^\\s*1[\\s1]*$/` are rejected before they reach any view, print layout, or PDF export. The corrupted `Teacher_Anam_Ashraf_Fall_2026.pdf` extraction is documented as rejected in the verification report; its four valid schedule records from the main schedule remain preserved.
 
 ## Notes

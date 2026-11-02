@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-02 — Cyber Security class categorization
+
+- Normalized the eight Semester 1, CYB-A Evening records to BS Cyber Security (BSCYB) across website views while leaving the source schedule data unchanged.
+- Restricted the BS Cyber Security date-sheet selector to undergraduate Cyber Security records, excluding MS Cyber Security sections.
+- Audited the BS Cyber Security schedules: all 56 papers across semesters 1, 3, 4, 5, and 7 have unique class/date/course entries and weekday labels matching their dates.
+
 ## 2026-10-31 — Advanced Program Categorization, Room & Teacher Prominence, Live Paper Status Tracker & Export Consistency
 
 - **Program-Wise Categorization & Navigation:**

@@ -6,6 +6,15 @@ let selected = [];
 let liveTickerInterval = null;
 let activeProgramDate = ''; // selected date in Cyber Security program sheets
 
+const CYBER_SECURITY_PROGRAM = 'BS Cyber Security';
+
+function isLegacyCyberSecuritySection(record) {
+  return record.programCode === 'BSCS_SPECIALIZATION' &&
+    String(record.semester) === '1' &&
+    record.section === 'CYB-A' &&
+    record.shift === 'Evening';
+}
+
 // Keep malformed extraction artifacts out of every view, export, and print path.
 const NUMERIC_FILLER = /^\s*1[\s1]*$/;
 const REQUIRED_RECORD_FIELDS = ['date', 'courseCode', 'courseTitle', 'room'];
@@ -20,10 +29,17 @@ function isValidExamRecord(record) {
 
 function validatedRecords(records) {
   return Array.isArray(records)
-    ? records.filter(isValidExamRecord).map(record => ({
-      ...record,
-      courseTitle: decodeHtml(record.courseTitle)
-    }))
+    ? records.filter(isValidExamRecord).map(record => {
+      const isCyberSecuritySection = isLegacyCyberSecuritySection(record);
+      return {
+        ...record,
+        ...(isCyberSecuritySection ? {
+          program: CYBER_SECURITY_PROGRAM,
+          programCode: 'BSCYB'
+        } : {}),
+        courseTitle: decodeHtml(record.courseTitle)
+      };
+    })
     : [];
 }
 
@@ -64,18 +80,12 @@ function weekdayScheduleHeading(value) {
   return `${date.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()} EXAMINATION SCHEDULE`;
 }
 
-const CYBER_SECURITY_PROGRAM = 'BS Cyber Security';
-
 function isCyberSecurityProgram(programName) {
   return /cyber\s+security/i.test(String(programName || ''));
 }
 
 function isCyberSecurityScheduleRecord(record) {
-  return isCyberSecurityProgram(record.program) ||
-    (record.programCode === 'BSCS_SPECIALIZATION' &&
-      String(record.semester) === '1' &&
-      record.section === 'CYB-A' &&
-      record.shift === 'Evening');
+  return record.program === CYBER_SECURITY_PROGRAM;
 }
 
 function dateDayGroups(rows) {
