@@ -7,9 +7,10 @@ let liveTickerInterval = null;
 let activeProgramDate = ''; // selected date in Cyber Security program sheets
 
 const CYBER_SECURITY_PROGRAM = 'BS Cyber Security';
+const ALL_CYBER_SECURITY_PROGRAMS = 'All Cyber Security Programs';
 
 function isLegacyCyberSecuritySection(record) {
-  return record.programCode === 'BSCS_SPECIALIZATION' &&
+  return ['BSCS_SPECIALIZATION', 'BSCYB'].includes(record.programCode) &&
     String(record.semester) === '1' &&
     record.section === 'CYB-A' &&
     record.shift === 'Evening';
@@ -85,7 +86,7 @@ function isCyberSecurityProgram(programName) {
 }
 
 function isCyberSecurityScheduleRecord(record) {
-  return record.program === CYBER_SECURITY_PROGRAM;
+  return isCyberSecurityProgram(record.program);
 }
 
 function dateDayGroups(rows) {
@@ -100,30 +101,24 @@ function dateDayGroups(rows) {
   return [...groups.values()];
 }
 
-const DAY_WISE_COLUMNS = [
-  ['semester', 'Semester'],
-  ['section', 'Section'],
-  ['shift', 'Shift'],
-  ['courseCode', 'Course Code'],
-  ['courseTitle', 'Course Title'],
-  ['teacher', 'Teacher / Invigilator'],
-  ['room', 'Room']
-];
-
 function buildDayWiseTable(rows, printMode = false) {
   const tableClass = printMode ? 'print-table daywise-table' : 'daywise-table';
   return `<div class="table-wrap daywise-table-wrap"><table class="${tableClass}">
-    <thead><tr><th>Sr.</th><th>Time</th>${DAY_WISE_COLUMNS.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
-    <tbody>${rows.map((row, index) => `<tr>
-      <td>${index + 1}</td>
-      <td>${esc(row.startTime)} – ${esc(row.endTime)}</td>
-      ${DAY_WISE_COLUMNS.map(([field]) => {
-        const value = field === 'teacher'
-          ? ((row.teacher && row.teacher.trim()) ? row.teacher.trim() : 'Not Available')
-          : (row[field] ?? '');
-        return `<td>${esc(field === 'courseTitle' ? decodeHtml(value) : value)}</td>`;
-      }).join('')}
-    </tr>`).join('')}</tbody>
+    <thead><tr><th>Program &amp; Section</th><th>Time / Slot</th><th>Code</th><th>Course Title</th><th>Room</th><th>Invigilator(s)</th></tr></thead>
+    <tbody>${rows.map(row => {
+      const program = isLegacyCyberSecuritySection(row) ? 'BS CS (Spec. Cyber Security)' : row.program || '';
+      const startTime = String(row.startTime || '').replace(/^(\d):/, '0$1:');
+      const endTime = String(row.endTime || '').replace(/^(\d):/, '0$1:');
+      const teacher = (row.teacher && row.teacher.trim()) ? row.teacher.trim() : 'Not Available';
+      return `<tr>
+        <td class="daywise-program-cell"><strong>${esc(program)}</strong><small>Semester ${esc(row.semester || '')} (${esc(row.shift || '')} - Sec ${esc(row.section || '')})</small></td>
+        <td class="daywise-time-cell"><strong>${esc(startTime)} - ${esc(endTime)}</strong><small>Slot ${esc(row.slot || '')}</small></td>
+        <td class="daywise-code-cell">${esc(row.courseCode || 'N/A')}</td>
+        <td>${esc(decodeHtml(row.courseTitle || 'N/A'))}</td>
+        <td class="daywise-room-cell">${esc(row.room || 'N/A')}</td>
+        <td>${esc(teacher)}</td>
+      </tr>`;
+    }).join('')}</tbody>
   </table></div>`;
 }
 
@@ -327,7 +322,7 @@ function getPrintMeta(rows) {
     };
   }
   if (view === 'program') {
-    const p = CYBER_SECURITY_PROGRAM;
+    const p = $('#programName')?.value || CYBER_SECURITY_PROGRAM;
     const sem = $('#programSem')?.value;
     const sec = $('#programSec')?.value;
     const shift = $('#programShift')?.value;
@@ -342,7 +337,12 @@ function getPrintMeta(rows) {
       heading: 'Mid-Term Examination — Fall 2026',
       programCoordinator: 'Program Coordinator: Dr. Hira Nazir',
       programName: p,
-      programContext: [p, sem && `Semester ${sem}`, sec && `Section ${sec}`, shift].filter(Boolean).join(' · '),
+      programContext: [
+        p === ALL_CYBER_SECURITY_PROGRAMS ? 'BS and MS Cyber Security' : p,
+        sem && `Semester ${sem}`,
+        sec && `Section ${sec}`,
+        shift
+      ].filter(Boolean).join(' · '),
       isCyberSecurityProgram: true,
       isDayWise: !!activeProgramDate,
       sheetType: 'Cyber Security Date Sheet',
@@ -1088,20 +1088,22 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
 
   // Table definition per view type
   let head, body;
-
-  if (isDayWise) {
-    head = [['Sr.', 'Time', 'Semester', 'Section', 'Shift', 'Course Code', 'Course Title', 'Teacher / Invigilator', 'Room']];
-    body = rows.map((r, i) => [
-      i + 1,
-      `${r.startTime} – ${r.endTime}`,
-      r.semester || '',
-      r.section || '',
-      r.shift || '',
+  const dayWisePdfRow = r => {
+    const program = isLegacyCyberSecuritySection(r) ? 'BS CS (Spec. Cyber Security)' : r.program || '';
+    const formatTime = value => String(value || '').replace(/^(\d):/, '0$1:');
+    return [
+      `${program}\nSemester ${r.semester || ''} (${r.shift || ''} - Sec ${r.section || ''})`,
+      `${formatTime(r.startTime)} - ${formatTime(r.endTime)}\nSlot ${r.slot || ''}`,
       r.courseCode || 'N/A',
       decodeHtml(r.courseTitle || 'N/A'),
-      (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available',
-      r.room || 'N/A'
-    ]);
+      r.room || 'N/A',
+      (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available'
+    ];
+  };
+
+  if (isDayWise) {
+    head = [['PROGRAM & SECTION', 'TIME / SLOT', 'CODE', 'COURSE TITLE', 'ROOM', 'INVIGILATOR(S)']];
+    body = rows.map(dayWisePdfRow);
   } else if (isClass) {
     head = [['Sr.', 'Date', 'Day', 'Time', 'Course Code', 'Course Title', 'Teacher / Invigilator', 'Room']];
     body = rows.map((r, i) => [
@@ -1170,15 +1172,12 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
   let columnStyles = {};
   if (isDayWise) {
     columnStyles = {
-      0: { cellWidth: 11 },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 14 },
-      3: { cellWidth: 14 },
-      4: { cellWidth: 21 },
-      5: { cellWidth: 24 },
-      6: { cellWidth: 67 },
-      7: { cellWidth: 67 },
-      8: { cellWidth: 21 }
+      0: { cellWidth: 62, fontStyle: 'bold', textColor: [34, 69, 125] },
+      1: { cellWidth: 48, fontStyle: 'bold', textColor: [45, 59, 76] },
+      2: { cellWidth: 25, textColor: [22, 111, 153] },
+      3: { cellWidth: 60 },
+      4: { cellWidth: 27, fontStyle: 'bold', textColor: [180, 43, 43] },
+      5: { cellWidth: 47 }
     };
   } else if (isClass) {
     columnStyles = {
@@ -1266,17 +1265,7 @@ function generatePdfDocContent(doc, rows, resolvedMeta) {
     dateDayGroups(rows).forEach((group, index) => {
       if (index > 0) doc.addPage();
       currentDayGroup = group;
-      const groupBody = group.rows.map((r, i) => [
-        i + 1,
-        `${r.startTime} – ${r.endTime}`,
-        r.semester || '',
-        r.section || '',
-        r.shift || '',
-        r.courseCode || 'N/A',
-        decodeHtml(r.courseTitle || 'N/A'),
-        (r.teacher && r.teacher.trim()) ? r.teacher.trim() : 'Not Available',
-        r.room || 'N/A'
-      ]);
+      const groupBody = group.rows.map(dayWisePdfRow);
       doc.autoTable(autoTableOptions(head, groupBody));
     });
   } else {
@@ -1494,19 +1483,23 @@ function getLiveScheduleStatus(now) {
     msUntil: future[0].msUntil,
     exams: future.filter(exam => exam.start.getTime() === nextStart)
   };
-  return { active, nextSession, completed };
+  return { active, future, nextSession, completed };
 }
 
 function liveExamCard(exam) {
   const teacher = (exam.teacher && exam.teacher.trim()) ? exam.teacher.trim() : 'Not Available';
+  const examDate = formatPakistanDateTime(exam.start, {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
   return `<article class="tracker-exam-card">
     <h4>${esc(decodeHtml(exam.courseTitle))}</h4>
     <p class="tracker-course-code">${esc(exam.courseCode)}</p>
     <dl class="tracker-exam-details">
       <div><dt>Semester</dt><dd>${esc(exam.semester)}</dd></div>
+      <div><dt>Program</dt><dd>${esc(exam.program)}</dd></div>
       <div><dt>Section</dt><dd>${esc(exam.section)}</dd></div>
       <div><dt>Shift</dt><dd>${esc(exam.shift)}</dd></div>
-      <div><dt>Examination Time</dt><dd>${esc(exam.startTime)} – ${esc(exam.endTime)}</dd></div>
+      <div><dt>Exam Date / Time</dt><dd>${esc(examDate)} · ${esc(exam.startTime)} – ${esc(exam.endTime)}</dd></div>
       <div><dt>Room</dt><dd>${esc(exam.room)}</dd></div>
       <div><dt>Teacher / Invigilator</dt><dd>${esc(teacher)}</dd></div>
     </dl>
@@ -1518,7 +1511,7 @@ function renderLiveTrackerWidget(container) {
   if (!container) return;
 
   const now = new Date();
-  const { active, nextSession, completed } = getLiveScheduleStatus(now);
+  const { active, future, nextSession, completed } = getLiveScheduleStatus(now);
   const formattedNow = formatPakistanDateTime(now, {
     weekday: 'long', day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
@@ -1545,7 +1538,8 @@ function renderLiveTrackerWidget(container) {
           <div class="countdown-unit"><span class="num">${countdown.secs}</span><span class="lbl">Seconds</span></div>
         </div>
       </div>
-      <div class="tracker-exam-grid">${nextSession.exams.map(liveExamCard).join('')}</div>`
+      <p class="tracker-upcoming-count">${future.length} upcoming paper${future.length === 1 ? '' : 's'} across BS and MS Cyber Security</p>
+      <div class="tracker-exam-grid">${future.map(liveExamCard).join('')}</div>`
     : '<p class="tracker-empty">No upcoming Cyber Security papers are scheduled.</p>';
 
   const completedContent = completed.length
@@ -1573,7 +1567,7 @@ function renderLiveTrackerWidget(container) {
       <div class="tracker-exam-grid">${liveContent}</div>
     </section>
     <section class="tracker-section" aria-labelledby="upcomingHeading">
-      <h4 id="upcomingHeading"><span class="tracker-status upcoming-status">UPCOMING</span> Next scheduled paper</h4>
+      <h4 id="upcomingHeading"><span class="tracker-status upcoming-status">UPCOMING</span> All scheduled papers</h4>
       ${upcomingContent}
     </section>
     <section class="tracker-section" aria-label="Completed Cyber Security examinations">
@@ -1601,7 +1595,7 @@ function startLiveTicker() {
 function live() {
   app.innerHTML = layout(
     '⚡ Cyber Security Live Examination Tracker',
-    `<p class="muted">Live, upcoming, and completed Cyber Security examinations, updated using Pakistan local time.</p>
+    `<p class="muted">Live, upcoming, and completed BS and MS Cyber Security examinations, updated using Pakistan local time.</p>
     <div id="dedicatedLiveContainer" style="margin-top:14px"></div>`
   );
   renderLiveTrackerWidget($('#dedicatedLiveContainer'));
@@ -1691,13 +1685,15 @@ function renderTeacher() {
 /* ============================================================
    VIEW: Cyber Security date sheets (Dynamic Cascading)
    ============================================================ */
-function program() {
-  const initialProg = CYBER_SECURITY_PROGRAM;
+function program(initialProgram = ALL_CYBER_SECURITY_PROGRAMS) {
+  const cyberPrograms = [ALL_CYBER_SECURITY_PROGRAMS, ...uniq('program').filter(isCyberSecurityProgram)];
+  const initialProg = cyberPrograms.includes(initialProgram) ? initialProgram : ALL_CYBER_SECURITY_PROGRAMS;
 
   app.innerHTML = layout(
     'Cyber Security Date Sheets',
-    `<p class="muted">View BS Cyber Security schedules by semester, section, and shift. Choose a date to create a day-wise sheet.</p>
+    `<p class="muted">View BS and MS Cyber Security schedules together, or select one program. Choose a date to create a day-wise sheet.</p>
     <div class="toolbar">
+      ${selector('Program', 'programName', cyberPrograms, 'Select Program')}
       ${selector('Semester', 'programSem', [])}
       ${selector('Section', 'programSec', [])}
       ${selector('Shift', 'programShift', [])}
@@ -1709,14 +1705,17 @@ function program() {
     <div id="programResult" style="margin-top:18px"></div>`
   );
 
+  const programSelect = $('#programName');
   const semSelect = $('#programSem');
   const secSelect = $('#programSec');
   const shiftSelect = $('#programShift');
+  programSelect.value = initialProg;
 
   // Dynamic cascading updates
   function updateCascade(changedLevel) {
-    const p = initialProg;
-    let pRecords = data.filter(isCyberSecurityScheduleRecord);
+    const p = programSelect.value;
+    let pRecords = data.filter(x => isCyberSecurityScheduleRecord(x) &&
+      (p === ALL_CYBER_SECURITY_PROGRAMS || x.program === p));
 
     // Update Semesters
     const sems = uniq('semester', pRecords);
@@ -1742,6 +1741,14 @@ function program() {
     renderProgram();
   }
 
+  programSelect.onchange = () => {
+    semSelect.value = '';
+    secSelect.value = '';
+    shiftSelect.value = '';
+    activeProgramDate = '';
+    updateCascade('program');
+  };
+
   semSelect.onchange = () => {
     secSelect.value = '';
     shiftSelect.value = '';
@@ -1766,7 +1773,7 @@ function program() {
       alert('No Cyber Security records match the selected filters.');
       return;
     }
-    const p = initialProg;
+    const p = programSelect.value;
     const sem = $('#programSem').value;
     const sec = $('#programSec').value;
     const shift = $('#programShift').value;
@@ -1787,7 +1794,7 @@ function program() {
       alert('No Cyber Security records match the selected filters.');
       return;
     }
-    const p = initialProg;
+    const p = programSelect.value;
     const sem = $('#programSem').value;
     const sec = $('#programSec').value;
     const shift = $('#programShift').value;
@@ -1848,14 +1855,14 @@ window.setProgramDateFilter = function(date) {
 };
 
 function renderProgram() {
-  const p = CYBER_SECURITY_PROGRAM;
+  const p = $('#programName')?.value || ALL_CYBER_SECURITY_PROGRAMS;
   const sem = $('#programSem')?.value;
   const sec = $('#programSec')?.value;
   const shift = $('#programShift')?.value;
 
   // Base filtered set before the date filter, used to derive available dates.
   const baseFiltered = data.filter(x => {
-    if (!isCyberSecurityScheduleRecord(x)) return false;
+    if (!isCyberSecurityScheduleRecord(x) || (p !== ALL_CYBER_SECURITY_PROGRAMS && x.program !== p)) return false;
     if (sem && String(x.semester) !== sem) return false;
     if (sec && x.section !== sec) return false;
     if (shift && x.shift !== shift) return false;
@@ -1885,7 +1892,12 @@ function renderProgram() {
   }
 
   const resultHeading = `<h3>Department of Cyber Security · ${selected.length} paper${selected.length === 1 ? '' : 's'}</h3>`;
-  const programContext = [p, sem && `Semester ${sem}`, sec && `Section ${sec}`, shift].filter(Boolean).join(' · ');
+  const programContext = [
+    p === ALL_CYBER_SECURITY_PROGRAMS ? 'BS and MS Cyber Security' : p,
+    sem && `Semester ${sem}`,
+    sec && `Section ${sec}`,
+    shift
+  ].filter(Boolean).join(' · ');
   const printMeta = {
     isCyberSecurityProgram: true,
     programName: p,
@@ -2131,7 +2143,7 @@ function renderProgramCards(filterText = '') {
 }
 
 window.openProgramSheet = function(progName) {
-  if (progName === CYBER_SECURITY_PROGRAM) show('program');
+  if (isCyberSecurityProgram(progName)) show('program');
   else show('class', progName);
 };
 
