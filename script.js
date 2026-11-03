@@ -1409,16 +1409,29 @@ const PAKISTAN_UTC_OFFSET_HOURS = 5;
 
 function parseExamDateTime(dateStr, timeStr) {
   if (!dateStr || !timeStr) return null;
-  const parts = dateStr.split('-').map(Number);
-  if (parts.length !== 3) return null;
-  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  const dateMatch = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!dateMatch) return null;
+  const [, yearText, monthText, dayText] = dateMatch;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  if (year < 1000 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+  const match = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!match) return null;
-  let hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours < 1 || hours > 12 || minutes > 59) return null;
+
   const meridiem = match[3].toUpperCase();
   if (meridiem === 'PM' && hours < 12) hours += 12;
   if (meridiem === 'AM' && hours === 12) hours = 0;
-  return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], hours - PAKISTAN_UTC_OFFSET_HOURS, minutes, 0, 0));
+
+  const localDate = new Date(Date.UTC(year, month - 1, day));
+  if (localDate.getUTCFullYear() !== year || localDate.getUTCMonth() !== month - 1 || localDate.getUTCDate() !== day) {
+    return null;
+  }
+  return new Date(Date.UTC(year, month - 1, day, hours - PAKISTAN_UTC_OFFSET_HOURS, minutes, 0, 0));
 }
 
 function formatPakistanDateTime(date, options) {
@@ -1464,6 +1477,7 @@ function getLiveScheduleStatus(now) {
 
     const startMs = start.getTime();
     const endMs = end.getTime();
+    if (endMs <= startMs) return;
 
     if (nowMs >= startMs && nowMs < endMs) {
       active.push({ ...r, start, end });
@@ -1486,11 +1500,14 @@ function getLiveScheduleStatus(now) {
   return { active, future, nextSession, completed };
 }
 
-function liveExamCard(exam) {
-  const teacher = (exam.teacher && exam.teacher.trim()) ? exam.teacher.trim() : 'Not Available';
+function liveExamCard(exam, isActive = false, now = new Date()) {
+  const teacher = String(exam.teacher || '').trim() || 'Not Available';
   const examDate = formatPakistanDateTime(exam.start, {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
   });
+  const progress = isActive
+    ? Math.max(0, Math.min(100, Math.floor((now.getTime() - exam.start.getTime()) / (exam.end.getTime() - exam.start.getTime()) * 100)))
+    : 0;
   return `<article class="tracker-exam-card">
     <h4>${esc(decodeHtml(exam.courseTitle))}</h4>
     <p class="tracker-course-code">${esc(exam.courseCode)}</p>
@@ -1503,14 +1520,53 @@ function liveExamCard(exam) {
       <div><dt>Room</dt><dd>${esc(exam.room)}</dd></div>
       <div><dt>Teacher / Invigilator</dt><dd>${esc(teacher)}</dd></div>
     </dl>
+    ${isActive ? `<div class="tracker-progress-wrap">
+      <div class="tracker-progress" role="progressbar" aria-label="Exam progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" data-progress-start="${exam.start.getTime()}" data-progress-end="${exam.end.getTime()}"><span style="width:${progress}%"></span></div>
+      <p class="tracker-progress-label">${progress}% elapsed</p>
+    </div>` : ''}
   </article>`;
 }
 
+function liveRenderMinuteKey(date) {
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}`;
+}
+
+function updateLiveTrackerReadouts(container, now) {
+  const clock = container.querySelector('#liveClockText');
+  if (clock) {
+    clock.textContent = formatPakistanDateTime(now, {
+      weekday: 'long', day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
+  }
+
+  const card = container.querySelector('.live-widget-card');
+  const nextExamTime = Number(card?.dataset.nextExamTime);
+  if (Number.isFinite(nextExamTime) && nextExamTime > 0) {
+    const countdown = formatCountdown(nextExamTime - now.getTime());
+    ['days', 'hours', 'mins', 'secs'].forEach(unit => {
+      const value = container.querySelector(`[data-countdown-unit="${unit}"] .num`);
+      if (value) value.textContent = countdown[unit];
+    });
+  }
+
+  container.querySelectorAll('.tracker-progress[data-progress-start]').forEach(progressBar => {
+    const start = Number(progressBar.dataset.progressStart);
+    const end = Number(progressBar.dataset.progressEnd);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return;
+    const progress = Math.max(0, Math.min(100, Math.floor((now.getTime() - start) / (end - start) * 100)));
+    progressBar.setAttribute('aria-valuenow', String(progress));
+    const fill = progressBar.querySelector('span');
+    if (fill) fill.style.width = `${progress}%`;
+    const label = progressBar.parentElement?.querySelector('.tracker-progress-label');
+    if (label) label.textContent = `${progress}% elapsed`;
+  });
+}
+
 /* Render Cyber Security Live Tracker */
-function renderLiveTrackerWidget(container) {
+function renderLiveTrackerWidget(container, now = new Date()) {
   if (!container) return;
 
-  const now = new Date();
   const { active, future, nextSession, completed } = getLiveScheduleStatus(now);
   const formattedNow = formatPakistanDateTime(now, {
     weekday: 'long', day: '2-digit', month: 'short', year: 'numeric',
@@ -1522,7 +1578,7 @@ function renderLiveTrackerWidget(container) {
   const timeFormat = { hour: 'numeric', minute: '2-digit', hour12: true };
 
   const liveContent = active.length
-    ? active.map(liveExamCard).join('')
+    ? active.map(exam => liveExamCard(exam, true, now)).join('')
     : '<p class="tracker-empty">No Cyber Security paper is currently being conducted.</p>';
 
   const upcomingContent = nextSession
@@ -1532,20 +1588,20 @@ function renderLiveTrackerWidget(container) {
           <span>${nextSession.exams.length} paper${nextSession.exams.length === 1 ? '' : 's'} scheduled simultaneously</span>
         </div>
         <div class="countdown-strip" aria-label="Time until next examination">
-          <div class="countdown-unit"><span class="num">${countdown.days}</span><span class="lbl">Days</span></div>
-          <div class="countdown-unit"><span class="num">${countdown.hours}</span><span class="lbl">Hours</span></div>
-          <div class="countdown-unit"><span class="num">${countdown.mins}</span><span class="lbl">Minutes</span></div>
-          <div class="countdown-unit"><span class="num">${countdown.secs}</span><span class="lbl">Seconds</span></div>
+          <div class="countdown-unit" data-countdown-unit="days"><span class="num">${countdown.days}</span><span class="lbl">Days</span></div>
+          <div class="countdown-unit" data-countdown-unit="hours"><span class="num">${countdown.hours}</span><span class="lbl">Hours</span></div>
+          <div class="countdown-unit" data-countdown-unit="mins"><span class="num">${countdown.mins}</span><span class="lbl">Minutes</span></div>
+          <div class="countdown-unit" data-countdown-unit="secs"><span class="num">${countdown.secs}</span><span class="lbl">Seconds</span></div>
         </div>
       </div>
       <p class="tracker-upcoming-count">${future.length} upcoming paper${future.length === 1 ? '' : 's'} across BS and MS Cyber Security</p>
-      <div class="tracker-exam-grid">${future.map(liveExamCard).join('')}</div>`
+      <div class="tracker-exam-grid">${future.map(exam => liveExamCard(exam)).join('')}</div>`
     : '<p class="tracker-empty">No upcoming Cyber Security papers are scheduled.</p>';
 
   const completedContent = completed.length
     ? `<details class="completed-exams" id="completedExams"${completedOpen ? ' open' : ''}>
         <summary><span class="tracker-status completed-status">COMPLETED</span> ${completed.length} paper${completed.length === 1 ? '' : 's'} have ended</summary>
-        <div class="tracker-exam-grid">${completed.map(liveExamCard).join('')}</div>
+        <div class="tracker-exam-grid">${completed.map(exam => liveExamCard(exam)).join('')}</div>
       </details>`
     : '<p class="tracker-empty">No Cyber Security papers have completed yet.</p>';
 
@@ -1574,6 +1630,9 @@ function renderLiveTrackerWidget(container) {
       ${completedContent}
     </section>
   </div>`;
+  const liveCard = container.querySelector('.live-widget-card');
+  if (liveCard) liveCard.dataset.nextExamTime = nextSession ? String(nextSession.time.getTime()) : '';
+  container.dataset.liveRenderMinute = liveRenderMinuteKey(now);
 }
 
 /* Real-time ticker to keep clock and countdowns live */
@@ -1585,7 +1644,14 @@ function startLiveTicker() {
   }
   liveTickerInterval = setInterval(() => {
     const container = document.getElementById('liveWidgetContainer') || document.getElementById('dedicatedLiveContainer');
-    if (container) renderLiveTrackerWidget(container);
+    if (!container) return;
+
+    const now = new Date();
+    if (container.dataset.liveRenderMinute !== liveRenderMinuteKey(now)) {
+      renderLiveTrackerWidget(container, now);
+    } else {
+      updateLiveTrackerReadouts(container, now);
+    }
   }, 1000);
 }
 
@@ -2218,72 +2284,93 @@ function dashboard() {
   `);
 }
 
+function renderInstructionMarkdownBlocks(lines) {
+  const blocks = [];
+  let paragraph = [];
+  let list = [];
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    blocks.push(`<p>${paragraph.map(line => esc(line)).join(' ')}</p>`);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (!list.length) return;
+    blocks.push(`<ol>${list.map(item => `<li>${esc(item)}</li>`).join('')}</ol>`);
+    list = [];
+  };
+
+  lines.forEach(line => {
+    const heading = line.match(/^(#{1,6})\s+(.+)$/);
+    const listItem = line.match(/^\s*\d+\.\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      const level = heading[1].length;
+      const tag = level === 1 ? 'h3' : 'h4';
+      blocks.push(`<${tag}>${esc(heading[2])}</${tag}>`);
+    } else if (listItem) {
+      flushParagraph();
+      list.push(listItem[1]);
+    } else if (!line.trim()) {
+      flushParagraph();
+      flushList();
+    } else {
+      flushList();
+      paragraph.push(line.trim());
+    }
+  });
+  flushParagraph();
+  flushList();
+
+  return blocks.join('').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+function renderInstructionMarkdown(markdown) {
+  const sections = [];
+  let currentSection = [];
+
+  String(markdown).replace(/^\uFEFF/, '').split(/\r?\n/).forEach(line => {
+    if (/^###\s+/.test(line) && currentSection.some(item => item.trim())) {
+      sections.push(currentSection);
+      currentSection = [];
+    }
+    currentSection.push(line);
+  });
+  if (currentSection.some(line => line.trim())) sections.push(currentSection);
+
+  return `<div class="instructions-list">${sections.map(lines =>
+    `<section class="instruction-card">${renderInstructionMarkdownBlocks(lines)}</section>`
+  ).join('')}</div>`;
+}
+
+function loadInstructionDocument(container) {
+  container.innerHTML = '<p class="muted" role="status">Loading examination instructions…</p>';
+  fetch('Insructions.txt', { cache: 'no-store' })
+    .then(response => {
+      if (!response.ok) throw new Error(`Could not load Insructions.txt (${response.status}).`);
+      return response.text();
+    })
+    .then(markdown => {
+      if (container.isConnected) container.innerHTML = renderInstructionMarkdown(markdown);
+    })
+    .catch(error => {
+      console.error('CSET Portal: failed to load examination instructions.', error);
+      if (!container.isConnected) return;
+      container.innerHTML = `<div class="card empty" role="alert">
+        <p>Could not load the examination instructions from Insructions.txt. Open the portal through a local or hosted web server, then try again.</p>
+        <button class="secondary" type="button">Retry</button>
+      </div>`;
+      container.querySelector('button').onclick = () => loadInstructionDocument(container);
+    });
+}
+
 function instructionsView() {
   app.innerHTML = layout(
     'Mid-Term Examination Guidelines',
-    `<p class="muted instructions-intro">Please read and follow the examination instructions and notices below.</p>
-    <div class="instructions-list">
-      <section class="instruction-card">
-        <h3>1. Mid-Term Examination Instructions</h3>
-        <p>Dear Students,</p>
-        <p>All students are instructed to strictly follow these guidelines during the Mid-Term Examinations:</p>
-        <ol>
-          <li>Follow the approved date sheet and arrive at the examination room at least 15 minutes before the scheduled time.</li>
-          <li>Bring your valid university ID card.</li>
-          <li>Late arrival will be dealt with according to university rules.</li>
-          <li>Bring your own stationery. Mobile phones, smartwatches, and other unauthorized electronic devices are strictly prohibited.</li>
-          <li>Maintain silence and discipline throughout the examination.</li>
-          <li>Cheating, copying, impersonation, and the use of unauthorized material are strictly prohibited.</li>
-          <li>Write your name, roll number, and other required information correctly on the answer sheet.</li>
-          <li>Do not leave the examination hall without the invigilator’s permission.</li>
-          <li>Follow all instructions issued by the invigilation staff and the Incharge Examination.</li>
-        </ol>
-        <p class="instruction-important"><strong>Important:</strong> Any violation of these instructions may result in disciplinary action under university rules.</p>
-        <p>Your cooperation is expected to ensure the smooth and fair conduct of examinations.</p>
-        <p class="instruction-signature"><strong>Incharge Examination</strong><br>Faculty of Computing &amp; Emerging Technologies</p>
-      </section>
-
-      <section class="instruction-card">
-        <h3>2. Soft Reminder: Fees and Examination Eligibility</h3>
-        <p>Aslam o alaikum</p>
-        <ol>
-          <li>All Repeaters are informed to bring a paid voucher of supplementary exam worth 6025/- during exam.</li>
-          <li>All students mentioned in the above fee defaulter list will bring paid fee voucher of semester otherwise they will not be allowed to sit in the exam. Thanks</li>
-        </ol>
-        <p>Aslam o alaikum</p>
-        <p>All CRs and GRs are informed that an excel sheet has been shared below in which all those students are mentioned who have not paid their semester dues.</p>
-        <p>If any one student claims that he or she has paid semester dues then he / she is informed to show paid voucher at admin office.</p>
-        <p>All these student names will be excluded from the exam attendance sheet and will not be allowed to sit in exam.</p>
-        <p>To avoid any inconveniences during mid term exams, pay your current semester dues and pending dues before exams. thanks</p>
-      </section>
-
-      <section class="instruction-card">
-        <h3>3. Mid-Term Examination Classroom Instructions</h3>
-        <p>Assalam-o-Alaikum Everyone,</p>
-        <p>As instructed by the department, Mid-Term Examinations will start from Monday, 02 November 2026, in four different slots.</p>
-        <p>All students are requested to cooperate and follow these instructions:</p>
-        <ol>
-          <li>Do not leave question papers behind after completing your exam.</li>
-          <li>Do not throw any wrappers or litter in the classrooms.</li>
-          <li>Every classroom has been assigned a specific room number. Please make sure you enter the correct room.</li>
-          <li>Do not disturb or change the seating arrangements, as chairs have been arranged according to examination SOPs.</li>
-        </ol>
-        <p>There will be very little time between exam slots for classroom cleaning and preparation. Therefore, everyone is requested to act responsibly and keep the classrooms clean.</p>
-        <p>Your cooperation will be appreciated.</p>
-      </section>
-
-      <section class="instruction-card">
-        <h3>4. Exam Notice: Repeaters and Paper Clashes</h3>
-        <p>All repeaters are hereby informed that if there is any clash between regular and repeater paper then immediately report to Admin office (Mr. Irfan Ajmal) today so that your problem could resolved before time. Kindly follow following instructions.</p>
-        <ol>
-          <li>Kindly pay your fee vouchers of supplementary exam before Mid Term Exam. No one repeater will be allowed to sit in exam without paid fee voucher worth 6025/-.</li>
-          <li>All those students who have not paid semester fee voucher, will not be allowed to sit in the exam.</li>
-          <li>If any one student claim clash in paper timing without any clash then their paper will be cancelled directly and he / she will not be allowed to sit in exam.</li>
-          <li>If any one student have applied for repeat subject and still there is any error in their voucher then visit admin office on immediate basis.</li>
-        </ol>
-      </section>
-    </div>`
+    `<p class="muted instructions-intro">Please read the official examination, fee, repeater, and classroom instructions below.</p>
+    <div id="instructionsDocument"></div>`
   );
+  loadInstructionDocument(document.getElementById('instructionsDocument'));
 }
 
 function aboutContact() {

@@ -42,6 +42,7 @@ The portal works as a static site and does not require a backend or build step.
 - **Class-Wise Date Sheets:** Focused class schedules for specific program, semester, section, and shift combinations with dynamic cascading selectors and invigilator details.
 - **Complete Date Sheet:** Global searchable and filterable view across all 413 records with multi-attribute filtering.
 - **Teacher Date Sheets:** Dedicated invigilation duty schedules for individual faculty members.
+- **Exam Instructions:** The Instructions section renders the current examination guidance from `Insructions.txt`; keep that file beside `index.html` and serve the portal over HTTP.
 - **Calendar-Based View:** Chronological date-by-date exam schedules with venue and invigilator indicators.
 - **White A4 Print & PDF Export Consistency:** Clean print view and jsPDF/AutoTable exports with the official Emerson University Multan header, university logo, classroom context, teacher metadata, and clean full-page timetable formatting.
 - **University Branding:** Official Emerson University Multan crest and institutional title blocks.

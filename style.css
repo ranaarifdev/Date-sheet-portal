@@ -546,6 +546,29 @@ tr:hover td {
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+.tracker-progress-wrap {
+  margin-top: 12px;
+}
+.tracker-progress {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbeafe;
+}
+.tracker-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  transition: width 0.5s ease;
+}
+.tracker-progress-label {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
 .tracker-empty,
 .tracker-no-current {
   margin: 0;
@@ -875,6 +898,11 @@ footer {
   margin: 0 0 12px;
   color: var(--blue);
   font-size: 17px;
+}
+.instruction-card h4 {
+  margin: 10px 0;
+  color: var(--blue);
+  font-size: 15px;
 }
 .instruction-card p {
   margin: 8px 0;
@@ -1839,6 +1867,8 @@ footer {
 .dark .tracker-exam-card h4,
 .dark .tracker-exam-details dd { color: #f1f5f9; }
 .dark .tracker-course-code { color: #7dd3fc; }
+.dark .tracker-progress { background: #1e4566; }
+.dark .tracker-progress-label { color: #cbd5e1; }
 .dark .tracker-empty,
 .dark .tracker-no-current {
   background: #1e293b;
