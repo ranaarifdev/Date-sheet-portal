@@ -147,7 +147,31 @@
     "2026-11-03": 66,
     "2026-11-04": 69,
     "2026-11-05": 69,
-    "2026-11-06": 67
+    "2026-11-06": 55,
+    "2026-11-10": 12
+  },
+  "reschedulingNotice": {
+    "notice": "Mid-Term Examinations of the only 7th and 8th Semesters, scheduled for Friday, 06-11-2026, have been rescheduled to Tuesday, 10-11-2026.",
+    "previousDate": "2026-11-06",
+    "previousDay": "Friday",
+    "newDate": "2026-11-10",
+    "newDay": "Tuesday",
+    "affectedRecordCount": 12,
+    "affectedRecordIds": [
+      "exam-049",
+      "exam-054",
+      "exam-109",
+      "exam-114",
+      "exam-205",
+      "exam-210",
+      "exam-259",
+      "exam-264",
+      "exam-337",
+      "exam-341",
+      "exam-348",
+      "exam-391"
+    ],
+    "note": "The active schedule applies this official notice. The extracted TXT/MD files and source PDF remain unchanged as records of the published source schedule."
   },
   "missingTeachers": [],
   "missingRooms": [],
@@ -162,7 +186,7 @@
       "issue": "The final PDF explicitly labels this row Friday, 29 Oct 2026; the calendar date is Thursday. Source label preserved and discrepancy documented."
     }
   ],
-  "validationStatus": "verified_against_new_full_pdf",
+  "validationStatus": "verified_against_source_pdf_with_official_rescheduling_notice",
   "sourceComparison": {
     "source": "Final updated CSET Mid Term Examination Fall 2026.pdf",
     "totalPagesInPDF": 24,
@@ -175,7 +199,7 @@
       "mismatches": 0
     },
     "jsonRecordsCompared": 413,
-    "fieldComparison": "All populated source rows parsed and normalized across date, day, time, slot, program, semester, section, shift, room, students, course code, course title, and invigilator fields.",
+    "fieldComparison": "All populated source rows were parsed and normalized across date, day, time, slot, program, semester, section, shift, room, students, course code, course title, and invigilator fields. The 12 date/day overrides in the active dataset follow the official rescheduling notice.",
     "classWiseSpotChecks": [
       {
         "recordId": "exam-205",
@@ -211,7 +235,8 @@
     "classWiseTitleSanitization": "passed (three-pass decoding handles nested ampersand, angle-bracket, quote, and apostrophe entities)"
   },
   "sourceNotes": [
-    "The uploaded source PDF is byte-for-byte identical to the previously verified 24-page source; all 413 schedule records already matched their assigned source pages, so no schedule values required changes.",
+    "The uploaded source PDF is byte-for-byte identical to the previously verified 24-page source; all 413 source schedule records matched their assigned pages before the rescheduling notice was applied.",
+    "The active schedule moves 12 Semester 7 and 8 records from 2026-11-06 (Friday) to 2026-11-10 (Tuesday) per the official notice; the extracted TXT/MD files and PDF retain their original published-source dates.",
     "The newest full CSET examination PDF supersedes older extracted TXT/MD files and the prior dataset.",
     "No populated source row had an unassigned invigilator; Not Available remains the runtime fallback for future blank values."
   ]

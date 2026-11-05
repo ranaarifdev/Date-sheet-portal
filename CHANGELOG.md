@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-05 — Semester 7 and 8 examination rescheduling
+
+- Rescheduled the 12 Semester 7 and 8 examinations originally set for Friday, 06 November 2026 to Tuesday, 10 November 2026, following the official notice.
+- Updated the active JSON and JavaScript schedules while retaining the extracted source files as published-source records.
+
 ## 2026-11-02 — Cyber Security class categorization
 
 - Normalized the eight Semester 1, CYB-A Evening records to BS Cyber Security (BSCYB) across website views while leaving the source schedule data unchanged.
